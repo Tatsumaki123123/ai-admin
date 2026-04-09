@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
     GET: '/profile',
     UPDATE: '/profile',
     CHANGE_PASSWORD: '/profile/change-password',
+    SELF: '/user/self',
   },
 
   // ==================== USER MANAGEMENT ====================

@@ -8,6 +8,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import './i18n/config.ts';
 
 // Create a QueryClient instance
 const queryClient = new QueryClient({

@@ -27,7 +27,18 @@ export const DARK_COLORS = {
   900: '#e0f1ff',
 } as const;
 
-export type ColorPalette = typeof LIGHT_COLORS;
+export type ColorPalette = {
+  50: string;
+  100: string;
+  200: string;
+  300: string;
+  400: string;
+  500: string;
+  600: string;
+  700: string;
+  800: string;
+  900: string;
+};
 
 export const getThemeColors = (theme: 'light' | 'dark'): ColorPalette => {
   return theme === 'dark' ? DARK_COLORS : LIGHT_COLORS;

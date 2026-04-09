@@ -8,7 +8,7 @@ import {
 } from '../../redux/auth/authSlice';
 import { enableRealData } from '../../redux/dataMode/dataModeSlice';
 import { RootState } from '../../redux/store';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const { Text, Title } = Typography;
 
@@ -23,21 +23,37 @@ export const LoginModal = () => {
   const { loginModalOpen, isLoading, error, isAuthenticated } = useSelector(
     (state: RootState) => state.auth
   );
+  const hasClosedRef = useRef(false);
 
-  // Clear form and error when modal closes
+  // Automatically close modal and enable real data after successful login
   useEffect(() => {
-    if (!loginModalOpen) {
-      form.resetFields();
-      dispatch(clearError());
+    if (
+      isAuthenticated &&
+      loginModalOpen &&
+      !isLoading &&
+      !hasClosedRef.current
+    ) {
+      hasClosedRef.current = true;
+      // Close modal
+      dispatch(setLoginModalOpen(false));
     }
-  }, [loginModalOpen, form, dispatch]);
+  }, [isAuthenticated, loginModalOpen, isLoading, dispatch]);
 
-  // Automatically switch to live mode after successful login
+  // Enable real data when authenticated
   useEffect(() => {
     if (isAuthenticated && !loginModalOpen) {
       dispatch(enableRealData());
     }
   }, [isAuthenticated, loginModalOpen, dispatch]);
+
+  // Clear form and error when modal closes, reset flag
+  useEffect(() => {
+    if (!loginModalOpen) {
+      form.resetFields();
+      dispatch(clearError());
+      hasClosedRef.current = false;
+    }
+  }, [loginModalOpen, form, dispatch]);
 
   const handleLogin = async (values: LoginFormValues) => {
     await dispatch(loginUser(values) as any);
@@ -105,7 +121,7 @@ export const LoginModal = () => {
             <Input
               prefix={<UserOutlined />}
               placeholder="admin@adminhub.com"
-              autoComplete="email"
+              autoComplete="off"
             />
           </Form.Item>
 
@@ -117,7 +133,7 @@ export const LoginModal = () => {
             <Input.Password
               prefix={<LockOutlined />}
               placeholder="Enter your password"
-              autoComplete="current-password"
+              autoComplete="off"
             />
           </Form.Item>
 

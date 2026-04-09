@@ -40,12 +40,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state from storage on mount
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       try {
+        // First check localStorage
         const isAuth = authService.isAuthenticated();
         if (isAuth) {
           const storedUser = authService.getCurrentUser();
           setUser(storedUser);
+        } else {
+          // Fallback: try to fetch current user from server to validate session cookie
+          try {
+            const self = await authService.getSelf();
+            if (self) {
+              tokenStorage.setUser(self);
+              setUser(self);
+            }
+          } catch {
+            // Session invalid, user stays null
+          }
         }
       } catch (error) {
         console.error('Failed to initialize auth:', error);

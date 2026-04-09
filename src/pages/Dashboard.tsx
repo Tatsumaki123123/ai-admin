@@ -1,119 +1,74 @@
+import { Card, Row, Col, Button, Table, Tag, Space, Select, Flex } from 'antd';
 import {
-  Layout,
-  Card,
-  Row,
-  Col,
-  Button,
-  Table,
-  Tag,
-  Menu,
-  Avatar,
-  Dropdown,
-  Space,
-  Tooltip,
-  Switch,
-  message,
-  Select,
-  MenuProps,
-} from 'antd';
-import {
-  LogoutOutlined,
-  UserOutlined,
-  BellOutlined,
-  FileTextOutlined,
-  DashboardOutlined,
   KeyOutlined,
-  SettingOutlined,
-  SunOutlined,
-  MoonOutlined,
+  DollarOutlined,
+  FileTextOutlined,
+  RiseOutlined,
+  ThunderboltOutlined,
+  BgColorsOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { toggleTheme } from '../redux/theme/themeSlice';
+import { useTranslation } from 'react-i18next';
 
-const { Header, Content, Sider } = Layout;
+const cardIcons = [
+  { icon: DollarOutlined, color: '#52c41a' },
+  { icon: KeyOutlined, color: '#1890ff' },
+  { icon: FileTextOutlined, color: '#faad14' },
+  { icon: DollarOutlined, color: '#f5222d' },
+  { icon: ThunderboltOutlined, color: '#faad14' },
+  { icon: BgColorsOutlined, color: '#722ed1' },
+  { icon: RiseOutlined, color: '#13c2c2' },
+  { icon: ClockCircleOutlined, color: '#eb2f96' },
+];
 
 export const DashboardPage = () => {
-  const navigate = useNavigate();
-  const { logout, user } = useAuth();
-  const dispatch = useDispatch();
+  const { t } = useTranslation();
   const { mytheme } = useSelector((state: RootState) => state.theme);
-  const [collapsed, setCollapsed] = useState(false);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      message.success('已退出登录');
-      navigate('/auth/signin', { replace: true });
-    } catch (error) {
-      console.error('Logout error:', error);
-      message.error('退出登录失败');
-    }
-  };
-
-  const menuItems = [
-    {
-      key: 'dashboard',
-      icon: <DashboardOutlined />,
-      label: '仪表盘',
-    },
-    {
-      key: 'api-keys',
-      icon: <KeyOutlined />,
-      label: 'API 密钥',
-    },
-    {
-      key: 'menu1',
-      label: '一级菜单',
-    },
-    {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: '个人资料',
-    },
-  ];
-
-  const userMenuItems: MenuProps['items'] = [
-    {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: '个人中心',
-    },
-    {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: '账户设置',
-    },
-    {
-      type: 'divider',
-    } as any,
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: '退出登录',
-      danger: true,
-    },
-  ];
-
-  const handleUserMenuClick = (e: any) => {
-    if (e.key === 'logout') {
-      handleLogout();
-    }
-  };
 
   // 统计卡片数据
   const statCards = [
-    { title: '余额', value: '$0.00', subtitle: '可用' },
-    { title: 'API 密钥', value: '0', subtitle: '0 密钥' },
-    { title: '余额池', value: '0', subtitle: '余计: 0' },
-    { title: '今日流素', value: '$0.0000', subtitle: '余计: $0.0000' },
-    { title: '今日 Token', value: '0', subtitle: '输入 0 / 输出: 0' },
-    { title: '累计 Token', value: '0', subtitle: '输入 0 / 输出: 0' },
-    { title: '虚拟创建', value: '0', subtitle: 'RPM: 0, TPM: 0' },
-    { title: '今日速率', value: '0ms', subtitle: '平均时间' },
+    {
+      title: t('dashboard.balance'),
+      value: '$0.00',
+      subtitle: t('dashboard.available'),
+    },
+    {
+      title: t('dashboard.apiKeys'),
+      value: '0',
+      subtitle: t('dashboard.apiKeyCount'),
+    },
+    {
+      title: t('dashboard.balancePool'),
+      value: '0',
+      subtitle: t('dashboard.balancePoolSubtitle'),
+    },
+    {
+      title: t('dashboard.dailyConsumption'),
+      value: '$0.0000',
+      subtitle: t('dashboard.dailyConsumptionSubtitle'),
+    },
+    {
+      title: t('dashboard.dailyToken'),
+      value: '0',
+      subtitle: t('dashboard.dailyTokenSubtitle'),
+    },
+    {
+      title: t('dashboard.totalToken'),
+      value: '0',
+      subtitle: t('dashboard.totalTokenSubtitle'),
+    },
+    {
+      title: t('dashboard.virtualCreation'),
+      value: '0',
+      subtitle: t('dashboard.virtualCreationSubtitle'),
+    },
+    {
+      title: t('dashboard.dailyRate'),
+      value: '0ms',
+      subtitle: t('dashboard.dailyRateSubtitle'),
+    },
   ];
 
   const recentData = [
@@ -127,356 +82,318 @@ export const DashboardPage = () => {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      {/* 左侧边栏 */}
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
-        width={200}
-        style={{
-          background: '#001529',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
-          position: 'relative',
-        }}
-      >
-        <div
+    <>
+      {/* 顶部标题区域 */}
+      <div style={{ marginBottom: 32 }}>
+        <h1
           style={{
-            padding: '16px',
-            textAlign: 'center',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-            marginBottom: '16px',
+            fontSize: '28px',
+            fontWeight: 'bold',
+            margin: '0 0 8px 0',
+            color: mytheme === 'dark' ? '#fff' : '#000',
           }}
         >
-          <div
-            style={{
-              fontSize: collapsed ? '16px' : '18px',
-              fontWeight: 'bold',
-              color: '#1890ff',
-              transition: 'all 0.3s',
-            }}
-          >
-            {collapsed ? 'XD' : 'XueDingToken'}
-          </div>
-        </div>
-
-        <Menu
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={['dashboard']}
-          items={menuItems}
+          {t('dashboard.title')}
+        </h1>
+        <p
           style={{
-            background: 'transparent',
-            border: 'none',
-          }}
-        />
-
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '24px',
-            width: '100%',
-            padding: '0 16px',
-            boxSizing: 'border-box',
+            fontSize: '14px',
+            color: mytheme === 'dark' ? '#8c8c8c' : '#666',
+            margin: 0,
           }}
         >
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              backdropFilter: 'blur(10px)',
-            }}
-          >
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <div
+          {t('dashboard.subtitle')}
+        </p>
+      </div>
+
+      {/* 统计卡片网格 */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
+        {statCards.map((card, index) => {
+          const IconComponent = cardIcons[index].icon;
+          const iconColor = cardIcons[index].color;
+          return (
+            <Col key={index} xs={24} sm={12} md={8} lg={6}>
+              <Card
                 style={{
-                  fontSize: '12px',
-                  color: '#fff',
+                  border: `1px solid ${
+                    mytheme === 'dark'
+                      ? 'rgba(255,255,255,0.06)'
+                      : 'rgba(0,0,0,0.06)'
+                  }`,
+                  boxShadow:
+                    mytheme === 'dark'
+                      ? '0 1px 4px rgba(0,0,0,0.25)'
+                      : '0 1px 2px rgba(0,0,0,0.03)',
+                  background: mytheme === 'dark' ? '#141414' : '#ffffff',
+                  padding: '16px',
+                  borderRadius: '8px',
                 }}
+                hoverable
               >
-                深色模式
-              </div>
-              <Switch
-                checked={mytheme === 'dark'}
-                onChange={() => dispatch(toggleTheme())}
-                checkedChildren={<MoonOutlined />}
-                unCheckedChildren={<SunOutlined />}
-              />
-            </Space>
-          </div>
-        </div>
-      </Sider>
-
-      {/* 主布局 */}
-      <Layout>
-        {/* 顶部栏 */}
-        <Header
-          style={{
-            background: mytheme === 'dark' ? '#141414' : '#fff',
-            padding: '16px 24px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderBottom: `1px solid ${
-              mytheme === 'dark' ? '#333' : '#e8e8e8'
-            }`,
-            height: 'auto',
-            minHeight: '64px',
-          }}
-        >
-          <div>
-            <h2
-              style={{ margin: 0, color: mytheme === 'dark' ? '#fff' : '#000' }}
-            >
-              仪表盘
-            </h2>
-            <p
-              style={{
-                margin: '4px 0 0 0',
-                fontSize: '12px',
-                color: mytheme === 'dark' ? '#8c8c8c' : '#999',
-              }}
-            >
-              记是您专户的概述。
-            </p>
-          </div>
-
-          <Space size="large" style={{ display: 'flex' }}>
-            <Tooltip title="通知">
-              <BellOutlined
-                style={{
-                  fontSize: '18px',
-                  cursor: 'pointer',
-                  color: mytheme === 'dark' ? '#fff' : '#000',
-                }}
-              />
-            </Tooltip>
-
-            <Tooltip title="文档">
-              <FileTextOutlined
-                style={{
-                  fontSize: '18px',
-                  cursor: 'pointer',
-                  color: mytheme === 'dark' ? '#fff' : '#000',
-                }}
-              />
-            </Tooltip>
-
-            <Select
-              defaultValue="zh"
-              style={{ width: 70 }}
-              options={[
-                { label: '中文', value: 'zh' },
-                { label: 'English', value: 'en' },
-              ]}
-            />
-
-            <div style={{ color: '#1890ff', fontWeight: 'bold' }}>$0.00</div>
-
-            <Dropdown
-              menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
-            >
-              <Space style={{ cursor: 'pointer' }}>
-                <Avatar
-                  style={{ backgroundColor: '#1890ff' }}
-                  icon={<UserOutlined />}
-                />
-                <span style={{ color: mytheme === 'dark' ? '#fff' : '#000' }}>
-                  {user?.email || 'User'}
-                </span>
-              </Space>
-            </Dropdown>
-          </Space>
-        </Header>
-
-        {/* 主内容 */}
-        <Content
-          style={{
-            padding: '24px 24px',
-            background: mytheme === 'dark' ? '#000' : '#f5f5f5',
-          }}
-        >
-          {/* 统计卡片网格 */}
-          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-            {statCards.map((card, index) => (
-              <Col key={index} xs={24} sm={12} lg={6}>
-                <Card
-                  style={{
-                    border: 'none',
-                    boxShadow:
-                      mytheme === 'dark'
-                        ? '0 2px 8px rgba(0,0,0,0.45)'
-                        : '0 2px 8px rgba(0,0,0,0.06)',
-                    background: mytheme === 'dark' ? '#1f1f1f' : '#fff',
-                  }}
-                  hoverable
-                >
+                <Flex gap="middle" align="flex-start">
                   <div
                     style={{
                       display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '8px',
+                      background: `${iconColor}15`,
+                      flexShrink: 0,
                     }}
                   >
-                    <div>
-                      <div
-                        style={{
-                          fontSize: '12px',
-                          color: mytheme === 'dark' ? '#8c8c8c' : '#999',
-                          marginBottom: '8px',
-                        }}
-                      >
-                        {card.title}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: '24px',
-                          fontWeight: 'bold',
-                          color: '#1890ff',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        {card.value}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: '12px',
-                          color: mytheme === 'dark' ? '#8c8c8c' : '#ccc',
-                        }}
-                      >
-                        {card.subtitle}
-                      </div>
+                    <IconComponent
+                      style={{
+                        fontSize: '24px',
+                        color: iconColor,
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: mytheme === 'dark' ? '#8c8c8c' : '#666',
+                        marginBottom: '4px',
+                        fontWeight: '500',
+                      }}
+                    >
+                      {card.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: '700',
+                        color: mytheme === 'dark' ? '#fff' : '#000',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      {card.value}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: mytheme === 'dark' ? '#595959' : '#999',
+                      }}
+                    >
+                      {card.subtitle}
                     </div>
                   </div>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+                </Flex>
+              </Card>
+            </Col>
+          );
+        })}
+      </Row>
 
-          {/* 图表区域 */}
-          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-            <Col xs={24} lg={12}>
-              <Card
-                title="模型分布"
-                style={{
-                  border: 'none',
-                  boxShadow:
-                    mytheme === 'dark'
-                      ? '0 2px 8px rgba(0,0,0,0.45)'
-                      : '0 2px 8px rgba(0,0,0,0.06)',
-                  background: mytheme === 'dark' ? '#1f1f1f' : '#fff',
-                }}
-              >
-                <div
-                  style={{
-                    height: '200px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: mytheme === 'dark' ? '#8c8c8c' : '#ccc',
-                  }}
-                >
-                  暂无数据
-                </div>
-              </Card>
-            </Col>
-            <Col xs={24} lg={12}>
-              <Card
-                title="Token 使用趋势"
-                style={{
-                  border: 'none',
-                  boxShadow:
-                    mytheme === 'dark'
-                      ? '0 2px 8px rgba(0,0,0,0.45)'
-                      : '0 2px 8px rgba(0,0,0,0.06)',
-                  background: mytheme === 'dark' ? '#1f1f1f' : '#fff',
-                }}
-              >
-                <div
-                  style={{
-                    height: '200px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: mytheme === 'dark' ? '#8c8c8c' : '#ccc',
-                  }}
-                >
-                  暂无数据
-                </div>
-              </Card>
-            </Col>
-          </Row>
+      {/* 时间范围和粒度选择 */}
+      <Flex
+        justify="space-between"
+        align="center"
+        style={{
+          marginBottom: 24,
+          padding: '12px 16px',
+          background: mytheme === 'dark' ? '#141414' : '#ffffff',
+          borderRadius: '8px',
+          border: `1px solid ${
+            mytheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
+          }`,
+        }}
+      >
+        <Space>
+          <span
+            style={{
+              color: mytheme === 'dark' ? '#fff' : '#000',
+              fontSize: '14px',
+            }}
+          >
+            {t('dashboard.time')}:
+          </span>
+          <Select
+            defaultValue="7days"
+            style={{ width: 120 }}
+            options={[
+              { label: '近 7 天', value: '7days' },
+              { label: '近 30 天', value: '30days' },
+              { label: '近 90 天', value: '90days' },
+              { label: '本年', value: 'year' },
+            ]}
+          />
+        </Space>
+        <Space>
+          <span
+            style={{
+              color: mytheme === 'dark' ? '#fff' : '#000',
+              fontSize: '14px',
+            }}
+          >
+            粒度:
+          </span>
+          <Select
+            defaultValue="daily"
+            style={{ width: 100 }}
+            options={[
+              { label: '按天', value: 'daily' },
+              { label: '按小时', value: 'hourly' },
+              { label: '按周', value: 'weekly' },
+            ]}
+          />
+        </Space>
+      </Flex>
 
-          {/* 最近使用和快捷操作 */}
-          <Row gutter={[16, 16]}>
-            <Col xs={24} lg={14}>
-              <Card
-                title="最近使用"
+      {/* 图表区域 */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} lg={12}>
+          <Card
+            title={t('dashboard.modelDistribution')}
+            style={{
+              border: `1px solid ${
+                mytheme === 'dark'
+                  ? 'rgba(255,255,255,0.06)'
+                  : 'rgba(0,0,0,0.06)'
+              }`,
+              boxShadow:
+                mytheme === 'dark'
+                  ? '0 1px 4px rgba(0,0,0,0.25)'
+                  : '0 1px 2px rgba(0,0,0,0.03)',
+              background: mytheme === 'dark' ? '#141414' : '#fafafa',
+              borderRadius: '12px',
+            }}
+          >
+            <div
+              style={{
+                height: '250px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: mytheme === 'dark' ? '#595959' : '#bfbfbf',
+              }}
+            >
+              {t('dashboard.noData')}
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card
+            title={t('dashboard.tokenTrend')}
+            style={{
+              border: `1px solid ${
+                mytheme === 'dark'
+                  ? 'rgba(255,255,255,0.06)'
+                  : 'rgba(0,0,0,0.06)'
+              }`,
+              boxShadow:
+                mytheme === 'dark'
+                  ? '0 1px 4px rgba(0,0,0,0.25)'
+                  : '0 1px 2px rgba(0,0,0,0.03)',
+              background: mytheme === 'dark' ? '#141414' : '#fafafa',
+              borderRadius: '12px',
+            }}
+          >
+            <div
+              style={{
+                height: '250px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: mytheme === 'dark' ? '#595959' : '#bfbfbf',
+              }}
+            >
+              {t('dashboard.noData')}
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* 最近使用和快捷操作 */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} lg={14}>
+          <Card
+            title={t('dashboard.recentUsage')}
+            extra={
+              <span
                 style={{
-                  border: 'none',
-                  boxShadow:
-                    mytheme === 'dark'
-                      ? '0 2px 8px rgba(0,0,0,0.45)'
-                      : '0 2px 8px rgba(0,0,0,0.06)',
-                  background: mytheme === 'dark' ? '#1f1f1f' : '#fff',
+                  color: mytheme === 'dark' ? '#8c8c8c' : '#999',
+                  fontSize: '12px',
                 }}
               >
-                <Table
-                  dataSource={recentData}
-                  columns={[
-                    {
-                      title: '操作',
-                      dataIndex: 'type',
-                      key: 'type',
-                      render: (text) => <span>{text}</span>,
-                    },
-                    {
-                      title: '时间',
-                      dataIndex: 'date',
-                      key: 'date',
-                      render: (text) => <span>{text}</span>,
-                    },
-                    {
-                      title: '状态',
-                      dataIndex: 'status',
-                      key: 'status',
-                      render: (status) => (
-                        <Tag color={status === 'success' ? 'green' : 'red'}>
-                          {status === 'success' ? '成功' : '失败'}
-                        </Tag>
-                      ),
-                    },
-                  ]}
-                  pagination={false}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} lg={10}>
-              <Card
-                title="快捷操作"
-                style={{
-                  border: 'none',
-                  boxShadow:
-                    mytheme === 'dark'
-                      ? '0 2px 8px rgba(0,0,0,0.45)'
-                      : '0 2px 8px rgba(0,0,0,0.06)',
-                  background: mytheme === 'dark' ? '#1f1f1f' : '#fff',
-                }}
-              >
-                <Space direction="vertical" style={{ width: '100%' }}>
-                  <Button type="primary" block icon={<KeyOutlined />}>
-                    创建 API 密钥
-                  </Button>
-                  <Button block>生成访问令牌</Button>
-                  <Button block>查看文档</Button>
-                </Space>
-              </Card>
-            </Col>
-          </Row>
-        </Content>
-      </Layout>
-    </Layout>
+                最近 7 天
+              </span>
+            }
+            style={{
+              border: `1px solid ${
+                mytheme === 'dark'
+                  ? 'rgba(255,255,255,0.06)'
+                  : 'rgba(0,0,0,0.06)'
+              }`,
+              boxShadow:
+                mytheme === 'dark'
+                  ? '0 1px 4px rgba(0,0,0,0.25)'
+                  : '0 1px 2px rgba(0,0,0,0.03)',
+              background: mytheme === 'dark' ? '#141414' : '#fafafa',
+              borderRadius: '12px',
+            }}
+          >
+            <Table
+              dataSource={recentData}
+              columns={[
+                {
+                  title: t('dashboard.operation'),
+                  dataIndex: 'type',
+                  key: 'type',
+                  render: (text) => <span>{text}</span>,
+                },
+                {
+                  title: t('dashboard.time'),
+                  dataIndex: 'date',
+                  key: 'date',
+                  render: (text) => <span>{text}</span>,
+                },
+                {
+                  title: t('dashboard.status'),
+                  dataIndex: 'status',
+                  key: 'status',
+                  render: (status) => (
+                    <Tag color={status === 'success' ? 'green' : 'red'}>
+                      {status === 'success'
+                        ? t('dashboard.success')
+                        : t('dashboard.failed')}
+                    </Tag>
+                  ),
+                },
+              ]}
+              pagination={false}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} lg={10}>
+          <Card
+            title={t('dashboard.quickActions')}
+            style={{
+              border: `1px solid ${
+                mytheme === 'dark'
+                  ? 'rgba(255,255,255,0.06)'
+                  : 'rgba(0,0,0,0.06)'
+              }`,
+              boxShadow:
+                mytheme === 'dark'
+                  ? '0 1px 4px rgba(0,0,0,0.25)'
+                  : '0 1px 2px rgba(0,0,0,0.03)',
+              background: mytheme === 'dark' ? '#141414' : '#fafafa',
+              borderRadius: '12px',
+            }}
+          >
+            <Space direction="vertical" style={{ width: '100%' }}>
+              <Button type="primary" block icon={<KeyOutlined />}>
+                {t('dashboard.createApiKey')}
+              </Button>
+              <Button block>{t('dashboard.generateToken')}</Button>
+              <Button block>{t('dashboard.viewDocs')}</Button>
+            </Space>
+          </Card>
+        </Col>
+      </Row>
+    </>
   );
 };

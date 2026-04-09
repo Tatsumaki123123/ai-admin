@@ -31,11 +31,19 @@ export const authService = {
 
     // The response from apiRequest.post is already the data (AxiosResponse.data)
     // Handle different response formats
+    // new-api returns: { success, message, data: { id, username, ... } }
     const userData =
-      (response as any)?.user || (response as any)?.data?.user || response;
+      (response as any)?.user ||
+      (response as any)?.data?.user ||
+      (response as any)?.data ||
+      response;
 
     // Store user data in localStorage
-    if (userData && typeof userData === 'object' && 'id' in userData) {
+    if (
+      userData &&
+      typeof userData === 'object' &&
+      ('id' in userData || 'username' in userData)
+    ) {
       if (import.meta.env.DEV) {
         console.log('[Auth Service] Session established, storing user:', {
           userId: userData.id,
@@ -157,6 +165,15 @@ export const authService = {
    */
   getCurrentUser: () => {
     return tokenStorage.getUser();
+  },
+
+  /**
+   * Fetch current user from server (validates session cookie)
+   */
+  getSelf: async () => {
+    const response = await apiRequest.get<any>(API_ENDPOINTS.PROFILE.SELF);
+    const user = (response as any)?.data || response;
+    return user;
   },
 
   /**

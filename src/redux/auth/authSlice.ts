@@ -15,7 +15,19 @@ export interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: authService.getUserFromToken(),
+  user: (() => {
+    // Try to restore user from localStorage first
+    try {
+      const storedUser = localStorage.getItem('user_data');
+      if (storedUser) {
+        return JSON.parse(storedUser);
+      }
+    } catch (error) {
+      console.error('Failed to parse stored user data:', error);
+    }
+    // Fallback to extracting from token
+    return authService.getUserFromToken();
+  })(),
   token: authService.getToken(),
   isAuthenticated: authService.isAuthenticated(),
   isLoading: false,
@@ -80,6 +92,9 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.error = null;
       authService.clearTokens();
+      // Clear from localStorage as well
+      localStorage.removeItem('user_data');
+      localStorage.removeItem('user_email');
     },
     setLoginModalOpen: (state, action: PayloadAction<boolean>) => {
       state.loginModalOpen = action.payload;
@@ -106,6 +121,10 @@ const authSlice = createSlice({
         };
         state.loginModalOpen = false;
         state.error = null;
+        // Save email to localStorage for persistence
+        localStorage.setItem('user_email', action.payload.email);
+        // Save full user data to localStorage for quick restoration on refresh
+        localStorage.setItem('user_data', JSON.stringify(state.user));
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -126,6 +145,9 @@ const authSlice = createSlice({
         state.token = null;
         state.user = null;
         state.error = null;
+        // Clear from localStorage as well
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('user_email');
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -134,6 +156,9 @@ const authSlice = createSlice({
         state.token = null;
         state.user = null;
         state.error = action.payload as string;
+        // Clear from localStorage as well
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('user_email');
       });
 
     // Refresh Token
@@ -146,12 +171,20 @@ const authSlice = createSlice({
         state.token = action.payload;
         state.user = authService.getUserFromToken();
         state.isAuthenticated = true;
+        // Update localStorage with new token
+        if (state.user?.email) {
+          localStorage.setItem('user_email', state.user.email);
+          localStorage.setItem('user_data', JSON.stringify(state.user));
+        }
       })
       .addCase(refreshToken.rejected, (state) => {
         state.isLoading = false;
         state.isAuthenticated = false;
         state.token = null;
         state.user = null;
+        // Clear from localStorage as well
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('user_email');
       });
   },
 });

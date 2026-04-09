@@ -154,7 +154,7 @@ const logisticsApi = {
 export const useTrucks = (options?: UseQueryOptions<any[]>) => {
   return useQuery({
     queryKey: truckKeys.all,
-    queryFn: logisticsApi.trucks.getAll,
+    queryFn: () => logisticsApi.trucks.getAll() as Promise<TruckDto[]>,
     ...options,
   });
 };
@@ -186,7 +186,9 @@ export const useUpdateTruck = () => {
       logisticsApi.trucks.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: truckKeys.all });
-      queryClient.invalidateQueries({ queryKey: truckKeys.detail(variables.id) });
+      queryClient.invalidateQueries({
+        queryKey: truckKeys.detail(variables.id),
+      });
     },
   });
 };
@@ -207,7 +209,8 @@ export const useDeleteTruck = () => {
 export const useDeliveries = (options?: UseQueryOptions<any[]>) => {
   return useQuery({
     queryKey: deliveryKeys.all,
-    queryFn: logisticsApi.deliveries.getAll,
+    queryFn: () =>
+      logisticsApi.deliveries.getAll() as Promise<TruckDeliveryDto[]>,
     ...options,
   });
 };
@@ -262,7 +265,10 @@ export const useDeleteDelivery = () => {
 export const useDeliveryRequests = (options?: UseQueryOptions<any[]>) => {
   return useQuery({
     queryKey: deliveryRequestKeys.all,
-    queryFn: logisticsApi.deliveryRequests.getAll,
+    queryFn: () =>
+      logisticsApi.deliveryRequests.getAll() as Promise<
+        TruckDeliveryRequestDto[]
+      >,
     ...options,
   });
 };
@@ -317,7 +323,8 @@ export const useDeleteDeliveryRequest = () => {
 export const useDeliveryAnalytics = (options?: UseQueryOptions<any[]>) => {
   return useQuery({
     queryKey: deliveryAnalyticsKeys.all,
-    queryFn: logisticsApi.analytics.getAll,
+    queryFn: () =>
+      logisticsApi.analytics.getAll() as Promise<DeliveryAnalyticDto[]>,
     ...options,
   });
 };

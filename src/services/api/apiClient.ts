@@ -204,15 +204,19 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      if (import.meta.env.DEV) {
-        console.warn('[Session Expired] Redirecting to login...');
-      }
-
       // Clear user data from localStorage
       tokenStorage.clearAuth();
 
-      // Redirect to login page
-      window.location.href = '/auth/signin';
+      // Only redirect if not already on auth pages and not a background init check
+      const isAuthPage = window.location.pathname.startsWith('/auth');
+      const isSelfCheck = originalRequest.url?.includes('/user/self');
+      if (!isAuthPage && !isSelfCheck) {
+        if (import.meta.env.DEV) {
+          console.warn('[Session Expired] Redirecting to login...');
+        }
+        window.location.href = '/auth/signin';
+      }
+
       return Promise.reject(error);
     }
 

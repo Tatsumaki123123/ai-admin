@@ -1,6 +1,12 @@
-import { createBrowserRouter, Outlet, useLocation } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  Outlet,
+  useLocation,
+  Navigate,
+} from 'react-router-dom';
 import {
   AccountDeactivePage,
+  ApiKeysPage,
   DashboardPage,
   Error400Page,
   Error403Page,
@@ -23,7 +29,7 @@ import {
   VerifyEmailPage,
   WelcomePage,
 } from '../pages';
-import { GuestLayout, UserAccountLayout } from '../layouts';
+import { GuestLayout, UserAccountLayout, AppLayout } from '../layouts';
 import React, { ReactNode, useEffect } from 'react';
 import { ProtectedRoute } from '../utils/ProtectedRoute';
 
@@ -70,13 +76,33 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: '/dashboard',
+    path: '/app',
     element: (
       <ProtectedRoute>
-        <PageWrapper children={<DashboardPage />} />
+        <AppLayout>
+          <Outlet />
+        </AppLayout>
       </ProtectedRoute>
     ),
     errorElement: <ErrorPage />,
+    children: [
+      {
+        path: 'dashboard',
+        element: <DashboardPage />,
+      },
+      {
+        path: 'keys',
+        element: <ApiKeysPage />,
+      },
+    ],
+  },
+  {
+    path: '/dashboard',
+    element: <Navigate to="/app/dashboard" replace />,
+  },
+  {
+    path: '/keys',
+    element: <Navigate to="/app/keys" replace />,
   },
   {
     path: '/user-profile',

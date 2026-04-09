@@ -7,7 +7,6 @@ import {
   Form,
   Input,
   message,
-  Modal,
   Row,
   Switch,
   theme,
@@ -15,8 +14,7 @@ import {
   Typography,
 } from 'antd';
 import { MoonOutlined, SunOutlined } from '@ant-design/icons';
-import { Verify as PuzzleCaptcha } from 'react-puzzle-captcha';
-import 'react-puzzle-captcha/dist/react-puzzle-captcha.css';
+
 import { PATH_AUTH, PATH_DASHBOARD } from '../../constants';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -43,8 +41,7 @@ export const SignInPage = () => {
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const auth = useAuth();
   const [formInstance] = Form.useForm();
-  const [imageCodeVerified, setImageCodeVerified] = useState(false);
-  const [verifyModalVisible, setVerifyModalVisible] = useState(false);
+
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Monitor authentication status and redirect when user logs in
@@ -57,23 +54,7 @@ export const SignInPage = () => {
     }
   }, [auth.isAuthenticated, isRedirecting, navigate, location]);
 
-  const handleVerify = () => {
-    setImageCodeVerified(true);
-    message.success('Verification passed!');
-    setVerifyModalVisible(false);
-  };
-
-  const handleVerifyFail = () => {
-    setImageCodeVerified(false);
-    message.error('Verification failed, please try again');
-  };
-
   const onFinish = async (values: any) => {
-    if (!imageCodeVerified) {
-      message.error('Please complete image verification first');
-      return;
-    }
-
     try {
       message.open({
         type: 'loading',
@@ -148,7 +129,7 @@ export const SignInPage = () => {
               style={{ width: '100%' }}
               initialValues={{
                 username: 'a@a.com',
-                password: '12345678',
+                password: 'abcd.1234',
                 remember: true,
               }}
               onFinish={onFinish}
@@ -170,6 +151,7 @@ export const SignInPage = () => {
                 <Input
                   placeholder="Enter your username or email"
                   style={{ width: '100%' }}
+                  autoComplete="username"
                 />
               </Form.Item>
 
@@ -191,25 +173,10 @@ export const SignInPage = () => {
                 <Input.Password
                   placeholder="Enter your password (8-20 characters)"
                   style={{ width: '100%' }}
+                  autoComplete="off"
+                  data-lpignore="true"
+                  data-form-type="other"
                 />
-              </Form.Item>
-
-              <Form.Item label="Image Verification">
-                <Button
-                  block
-                  size="large"
-                  onClick={() => setVerifyModalVisible(true)}
-                  style={{
-                    background: imageCodeVerified ? '#52c41a' : colorPrimary,
-                    color: '#fff',
-                    borderColor: imageCodeVerified ? '#52c41a' : colorPrimary,
-                  }}
-                  disabled={imageCodeVerified}
-                >
-                  {imageCodeVerified
-                    ? '✓ Verification Passed'
-                    : 'Click to Verify'}
-                </Button>
               </Form.Item>
 
               <Form.Item<FieldType> name="remember" valuePropName="checked">
@@ -239,19 +206,6 @@ export const SignInPage = () => {
                 </Link>
               </Flex>
             </Form>
-
-            <Modal
-              title="Image Verification"
-              open={verifyModalVisible}
-              onCancel={() => setVerifyModalVisible(false)}
-              footer={null}
-              centered
-            >
-              <PuzzleCaptcha
-                onSuccess={handleVerify}
-                onFail={handleVerifyFail}
-              />
-            </Modal>
           </Flex>
         </Card>
       </Col>
