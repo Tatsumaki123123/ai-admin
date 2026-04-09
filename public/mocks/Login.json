@@ -1,0 +1,16 @@
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJkZW1vQGV4YW1wbGUuY29tIiwicm9sZXMiOlsiYWRtaW4iXSwiaWF0IjoxNzMzMDQwMDAwLCJleHAiOjE3MzMxMjY0MDB9.mock-signature",
+  "refreshToken": "mock-refresh-token-1234567890",
+  "user": {
+    "id": "1234567890",
+    "email": "demo@example.com",
+    "userName": "Demo User",
+    "firstName": "Demo",
+    "lastName": "User",
+    "roles": ["admin"],
+    "avatar": "https://i.pravatar.cc/150?img=1",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-12-01T00:00:00.000Z"
+  },
+  "expiresAt": "2024-12-02T00:00:00.000Z"
+}
