@@ -11,6 +11,7 @@ import {
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useTranslation } from 'react-i18next';
+import { usePageHeader } from '../hooks/usePageContext';
 
 const cardIcons = [
   { icon: DollarOutlined, color: '#52c41a' },
@@ -26,6 +27,11 @@ const cardIcons = [
 export const DashboardPage = () => {
   const { t } = useTranslation();
   const { mytheme } = useSelector((state: RootState) => state.theme);
+
+  usePageHeader({
+    title: t('dashboard.title'),
+    description: t('dashboard.subtitle'),
+  });
 
   // 统计卡片数据
   const statCards = [
@@ -83,29 +89,6 @@ export const DashboardPage = () => {
 
   return (
     <>
-      {/* 顶部标题区域 */}
-      <div style={{ marginBottom: 32 }}>
-        <h1
-          style={{
-            fontSize: '28px',
-            fontWeight: 'bold',
-            margin: '0 0 8px 0',
-            color: mytheme === 'dark' ? '#fff' : '#000',
-          }}
-        >
-          {t('dashboard.title')}
-        </h1>
-        <p
-          style={{
-            fontSize: '14px',
-            color: mytheme === 'dark' ? '#8c8c8c' : '#666',
-            margin: 0,
-          }}
-        >
-          {t('dashboard.subtitle')}
-        </p>
-      </div>
-
       {/* 统计卡片网格 */}
       <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
         {statCards.map((card, index) => {

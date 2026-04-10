@@ -1,30 +1,30 @@
 // Theme-aware color palettes
-// Generated from primary color #076ee5 (#2378c3 adjusted)
+// Generated from primary color #da7658
 
 export const LIGHT_COLORS = {
-  50: '#e0f1ff',
-  100: '#b0d2ff',
-  200: '#7fb0ff',
-  300: '#4d8bff',
-  400: '#1e79fe',
-  500: '#076ee5',
-  600: '#0062b3',
-  700: '#004f81',
-  800: '#003650',
-  900: '#001620',
+  50: '#fdf0eb',
+  100: '#f8d7cc',
+  200: '#f1b8a7',
+  300: '#ea9982',
+  400: '#e17f64',
+  500: '#da7658',
+  600: '#c46446',
+  700: '#a85136',
+  800: '#7f3c28',
+  900: '#55281b',
 } as const;
 
 export const DARK_COLORS = {
-  50: '#001620',
-  100: '#003650',
-  200: '#004f81',
-  300: '#0062b3',
-  400: '#076ee5',
-  500: '#1e79fe',
-  600: '#4d8bff',
-  700: '#7fb0ff',
-  800: '#b0d2ff',
-  900: '#e0f1ff',
+  50: '#55281b',
+  100: '#7f3c28',
+  200: '#a85136',
+  300: '#c46446',
+  400: '#da7658',
+  500: '#e17f64',
+  600: '#ea9982',
+  700: '#f1b8a7',
+  800: '#f8d7cc',
+  900: '#fdf0eb',
 } as const;
 
 export type ColorPalette = {
@@ -44,5 +44,22 @@ export const getThemeColors = (theme: 'light' | 'dark'): ColorPalette => {
   return theme === 'dark' ? DARK_COLORS : LIGHT_COLORS;
 };
 
+export const hexToRgba = (hex: string, alpha: number) => {
+  const normalized = hex.replace('#', '');
+  const fullHex =
+    normalized.length === 3
+      ? normalized
+          .split('')
+          .map((char) => `${char}${char}`)
+          .join('')
+      : normalized;
+
+  const r = Number.parseInt(fullHex.slice(0, 2), 16);
+  const g = Number.parseInt(fullHex.slice(2, 4), 16);
+  const b = Number.parseInt(fullHex.slice(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 // Primary color (same for both themes as the algorithm adjusts it)
-export const PRIMARY_COLOR = '#076ee5';
+export const PRIMARY_COLOR = '#da7658';

@@ -12,16 +12,16 @@ import './App.css';
 // Legacy COLOR export for backward compatibility
 // TODO: Migrate all usages to theme-aware colors from theme/colors.ts
 export const COLOR = {
-  50: '#e0f1ff',
-  100: '#b0d2ff',
-  200: '#7fb0ff',
-  300: '#4d8bff',
-  400: '#1e79fe',
-  500: '#076ee5',
-  600: '#0062b3',
-  700: '#004f81',
-  800: '#003650',
-  900: '#001620',
+  50: '#fdf0eb',
+  100: '#f8d7cc',
+  200: '#f1b8a7',
+  300: '#ea9982',
+  400: '#e17f64',
+  500: '#da7658',
+  600: '#c46446',
+  700: '#a85136',
+  800: '#7f3c28',
+  900: '#55281b',
   borderColor: '#E7EAF3B2',
 };
 

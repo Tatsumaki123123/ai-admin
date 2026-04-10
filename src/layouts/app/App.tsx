@@ -10,9 +10,10 @@ import {
   Switch,
   Divider,
   Badge,
+  Typography,
 } from 'antd';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate, Outlet } from 'react-router-dom';
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   LogoutOutlined,
   QuestionOutlined,
@@ -46,10 +47,15 @@ import { logoutUser, setToken, setUser } from '../../redux/auth/authSlice';
 import { enableMockData } from '../../redux/dataMode/dataModeSlice';
 import { RootState } from '../../redux/store.ts';
 import { useAuth } from '../../contexts/AuthContext';
+import {
+  PageContextProvider,
+  PageHeaderState,
+} from '../../hooks/usePageContext';
+import { PRIMARY_COLOR, hexToRgba } from '../../theme/colors';
 const { Content } = Layout;
 
 type AppLayoutProps = {
-  children: ReactNode;
+  children?: ReactNode;
 };
 
 export const AppLayout = ({ children }: AppLayoutProps) => {
@@ -60,6 +66,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const [collapsed, setCollapsed] = useState(true);
   const [navFill, setNavFill] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [pageHeader, setPageHeader] = useState<PageHeaderState>({
+    title: null,
+    description: null,
+  });
   const location = useLocation();
   const navigate = useNavigate();
   const nodeRef = useRef(null);
@@ -81,6 +91,23 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const userBalance = `$${(((authUser as any)?.quota || 0) / 500000).toFixed(
     2
   )}`;
+  const setPageContext = useCallback((context: PageHeaderState) => {
+    setPageHeader({
+      title: context.title ?? null,
+      description: context.description ?? null,
+    });
+  }, []);
+  const clearPageContext = useCallback(() => {
+    setPageHeader({ title: null, description: null });
+  }, []);
+  const pageContextValue = useMemo(
+    () => ({
+      ...pageHeader,
+      setPageContext,
+      clearPageContext,
+    }),
+    [clearPageContext, pageHeader, setPageContext]
+  );
 
   const handleLogout = async () => {
     message.open({
@@ -204,7 +231,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                 : 'none',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'flex-end',
+              justifyContent: 'space-between',
+              gap: '24px',
               height: '64px',
               zIndex: 100,
               transition: 'all .25s',
@@ -213,8 +241,38 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               }`,
             }}
           >
+            <Flex
+              vertical
+              justify="center"
+              style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}
+            >
+              <Typography.Text
+                strong
+                style={{
+                  fontSize: isMobile ? '18px' : '22px',
+                  lineHeight: 1.2,
+                  color: mytheme === 'dark' ? '#fff' : '#000',
+                }}
+              >
+                {pageHeader.title ?? ''}
+              </Typography.Text>
+              {!isMobile && pageHeader.description && (
+                <Typography.Text
+                  style={{
+                    fontSize: '13px',
+                    color: mytheme === 'dark' ? '#8c8c8c' : '#666',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {pageHeader.description}
+                </Typography.Text>
+              )}
+            </Flex>
+
             {/* 右侧: 功能菜单 */}
-            <Flex align="center" gap="middle" style={{ marginLeft: 'auto' }}>
+            <Flex align="center" gap="middle" style={{ flexShrink: 0 }}>
               {/* 通知图标 */}
               <Badge dot offset={[-2, 2]}>
                 <Tooltip title="通知">
@@ -311,12 +369,12 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                 align="center"
                 gap={4}
                 style={{
-                  background: 'rgba(0, 200, 160, 0.1)',
-                  border: '1px solid rgba(0, 200, 160, 0.3)',
+                  background: hexToRgba(PRIMARY_COLOR, 0.12),
+                  border: `1px solid ${hexToRgba(PRIMARY_COLOR, 0.28)}`,
                   borderRadius: '20px',
                   padding: '4px 12px',
                   cursor: 'pointer',
-                  color: '#00c8a0',
+                  color: PRIMARY_COLOR,
                   fontSize: '13px',
                   fontWeight: '500',
                 }}
@@ -368,7 +426,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                       width: 32,
                       height: 32,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #00d589, #00b8d9)',
+                      background: `linear-gradient(135deg, ${PRIMARY_COLOR}, #c45e42)`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -424,29 +482,31 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               background: mytheme === 'dark' ? '#000' : '#f5f5f5',
             }}
           >
-            <TransitionGroup>
-              <SwitchTransition>
-                <CSSTransition
-                  key={`css-transition-${location.key}`}
-                  nodeRef={nodeRef}
-                  onEnter={() => {
-                    setIsLoading(true);
-                  }}
-                  onEntered={() => {
-                    setIsLoading(false);
-                  }}
-                  timeout={300}
-                  classNames="bottom-to-top"
-                  unmountOnExit
-                >
-                  {() => (
-                    <div ref={nodeRef} style={{ background: 'none' }}>
-                      {children}
-                    </div>
-                  )}
-                </CSSTransition>
-              </SwitchTransition>
-            </TransitionGroup>
+            <PageContextProvider value={pageContextValue}>
+              <TransitionGroup>
+                <SwitchTransition>
+                  <CSSTransition
+                    key={`css-transition-${location.key}`}
+                    nodeRef={nodeRef}
+                    onEnter={() => {
+                      setIsLoading(true);
+                    }}
+                    onEntered={() => {
+                      setIsLoading(false);
+                    }}
+                    timeout={300}
+                    classNames="bottom-to-top"
+                    unmountOnExit
+                  >
+                    {() => (
+                      <div ref={nodeRef} style={{ background: 'none' }}>
+                        {children ?? <Outlet />}
+                      </div>
+                    )}
+                  </CSSTransition>
+                </SwitchTransition>
+              </TransitionGroup>
+            </PageContextProvider>
             <div ref={floatBtnRef}>
               <FloatButton.BackTop />
             </div>

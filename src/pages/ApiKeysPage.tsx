@@ -13,6 +13,7 @@ import {
   Tooltip,
   Spin,
   Switch,
+  Flex,
 } from 'antd';
 import {
   PlusOutlined,
@@ -25,8 +26,8 @@ import {
 import { useState, useEffect } from 'react';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import axios from 'axios';
-import { AppPageLayout } from '../layouts';
 import { useTranslation } from 'react-i18next';
+import { usePageHeader } from '../hooks/usePageContext';
 
 interface ApiKeyItem {
   id: number;
@@ -65,6 +66,10 @@ interface DisplayKey extends ApiKeyItem {
 
 export const ApiKeysPage = () => {
   const { t } = useTranslation();
+  usePageHeader({
+    title: t('apiKeys.title'),
+    description: t('apiKeys.subtitle'),
+  });
   const [apiKeys, setApiKeys] = useState<DisplayKey[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -331,25 +336,14 @@ export const ApiKeysPage = () => {
   ];
 
   return (
-    <AppPageLayout>
-      <Card
-        title={t('apiKeys.title')}
-        style={{ marginBottom: '24px' }}
-        extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleCreateKey}
-            disabled
-          >
-            Create Key
-          </Button>
-        }
-      >
-        <Space
-          style={{ marginBottom: '16px', display: 'flex' }}
-          direction="vertical"
-          size="large"
+    <>
+      <Card style={{ marginBottom: '24px' }}>
+        <Flex
+          justify="space-between"
+          align="center"
+          wrap="wrap"
+          gap="middle"
+          style={{ marginBottom: '16px' }}
         >
           <Space wrap>
             <Input.Search
@@ -379,7 +373,15 @@ export const ApiKeysPage = () => {
               ]}
             />
           </Space>
-        </Space>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleCreateKey}
+            disabled
+          >
+            Create Key
+          </Button>
+        </Flex>
 
         <Spin spinning={loading}>
           <Table
@@ -443,6 +445,6 @@ export const ApiKeysPage = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </AppPageLayout>
+    </>
   );
 };

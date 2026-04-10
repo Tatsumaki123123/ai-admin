@@ -15,6 +15,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import logoImg from '../../assets/logo.png';
+import { PRIMARY_COLOR, hexToRgba } from '../../theme/colors';
 
 const { Sider } = Layout;
 
@@ -31,6 +32,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
   const location = useLocation();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const isDark = mytheme === 'dark';
+  const normalizedPathname = location.pathname.startsWith('/app/')
+    ? location.pathname.replace('/app', '')
+    : location.pathname;
 
   const menuItems: MenuProps['items'] = [
     {
@@ -87,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
     menuItems
       ?.filter(
         (item: any) =>
-          item?.key && location.pathname.startsWith(item.key as string)
+          item?.key && normalizedPathname.startsWith(item.key as string)
       )
       .map((item: any) => item?.key as string)[0] || '/dashboard';
 
@@ -162,11 +166,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
         >
           <ConfigProvider
             theme={{
-              token: { colorPrimary: '#00c8a0' },
+              token: { colorPrimary: PRIMARY_COLOR },
               components: {
                 Menu: {
-                  itemSelectedBg: 'rgba(0, 200, 160, 0.1)',
-                  itemSelectedColor: '#00c8a0',
+                  itemSelectedBg: hexToRgba(PRIMARY_COLOR, 0.12),
+                  itemSelectedColor: PRIMARY_COLOR,
                 },
               },
             }}
