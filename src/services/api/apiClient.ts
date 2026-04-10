@@ -15,6 +15,7 @@ import axios, {
 import { tokenStorage } from '../auth/tokenStorage';
 import { ApiErrorResponse } from '../../types/api/generic';
 import { store } from '../../redux/store';
+import { message } from 'antd';
 import {
   convertToMockEndpoint,
   isMockOnlyEndpoint,
@@ -186,6 +187,7 @@ apiClient.interceptors.response.use(
           });
         }
 
+        message.error(responseData.message || '请求失败');
         return Promise.reject(error);
       }
     }

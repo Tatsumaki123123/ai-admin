@@ -1,5 +1,11 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { DashboardPage, ApiKeysPage, SignInPage, SignUpPage } from '../pages';
+import {
+  DashboardPage,
+  ApiKeysPage,
+  DeployPage,
+  SignInPage,
+  SignUpPage,
+} from '../pages';
 import { AppLayout } from '../layouts';
 import { ProtectedRoute } from '../utils/ProtectedRoute';
 
@@ -23,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: 'keys',
         element: <ApiKeysPage />,
+      },
+      {
+        path: 'deploy',
+        element: <DeployPage />,
       },
     ],
   },
