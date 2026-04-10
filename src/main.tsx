@@ -22,16 +22,14 @@ const queryClient = new QueryClient({
 });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} />
-      <PersistGate persistor={persistor}>
-        <Provider store={store}>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-        </Provider>
-      </PersistGate>
-    </QueryClientProvider>
-  </React.StrictMode>
+  <QueryClientProvider client={queryClient}>
+    <ReactQueryDevtools initialIsOpen={false} />
+    <PersistGate persistor={persistor}>
+      <Provider store={store}>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </Provider>
+    </PersistGate>
+  </QueryClientProvider>
 );

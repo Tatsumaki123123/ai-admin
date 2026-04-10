@@ -45,8 +45,12 @@ function App() {
               dotWidth: 8,
             },
             Table: {
-              colorBgContainer: 'none',
-              headerBg: 'none',
+              colorBgContainer: 'transparent',
+              headerBg: 'transparent',
+              rowHoverBg:
+                mytheme === 'dark'
+                  ? 'rgba(255,255,255,0.06)'
+                  : 'rgba(0,0,0,0.04)',
             },
             Timeline: {
               dotBg: 'none',

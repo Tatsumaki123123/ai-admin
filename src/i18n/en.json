@@ -69,6 +69,21 @@
     "allGroups": "All Groups",
     "allStatus": "All Status",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "createKey": "Create Key",
+    "editKey": "Edit Key",
+    "keyName": "Key Name",
+    "keyNamePlaceholder": "e.g. My API Key",
+    "groupPlaceholder": "Select a group",
+    "allowIps": "Allowed IPs",
+    "allowIpsPlaceholder": "Leave blank to allow all, separate multiple IPs with commas",
+    "enableModelLimit": "Enable Model Restrictions",
+    "createSuccess": "Key created successfully",
+    "updateSuccess": "Key updated successfully",
+    "deleteSuccess": "Key deleted successfully",
+    "createFailed": "Failed to create key",
+    "updateFailed": "Failed to update key",
+    "deleteFailed": "Failed to delete key",
+    "copySuccess": "Copied to clipboard"
   }
 }

@@ -1,19 +1,21 @@
-import {
+﻿import {
   Card,
   Button,
   Table,
   Tag,
   Space,
   Input,
-  Select,
   Modal,
   Form,
   message,
   Popconfirm,
   Tooltip,
-  Spin,
   Switch,
   Flex,
+  Select,
+  InputNumber,
+  DatePicker,
+  Typography,
 } from 'antd';
 import {
   PlusOutlined,
@@ -22,12 +24,21 @@ import {
   DeleteOutlined,
   EyeOutlined,
   EyeInvisibleOutlined,
+  ReloadOutlined,
+  KeyOutlined,
+  SafetyOutlined,
+  LockOutlined,
 } from '@ant-design/icons';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
-import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { usePageHeader } from '../hooks/usePageContext';
+import apiClient from '../services/api/apiClient';
+import dayjs, { Dayjs } from 'dayjs';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+
+const { Text } = Typography;
 
 interface ApiKeyItem {
   id: number;
@@ -50,18 +61,14 @@ interface ApiKeyItem {
 }
 
 interface ApiResponse {
-  data: {
-    page: number;
-    page_size: number;
-    total: number;
-    items: ApiKeyItem[];
-  };
+  data: { page: number; page_size: number; total: number; items: ApiKeyItem[] };
   message: string;
   success: boolean;
 }
 
-interface DisplayKey extends ApiKeyItem {
-  visibleKey?: boolean;
+interface GroupInfo {
+  desc: string;
+  ratio: number;
 }
 
 export const ApiKeysPage = () => {
@@ -70,240 +77,226 @@ export const ApiKeysPage = () => {
     title: t('apiKeys.title'),
     description: t('apiKeys.subtitle'),
   });
-  const [apiKeys, setApiKeys] = useState<DisplayKey[]>([]);
+  const { mytheme } = useSelector((state: RootState) => state.theme);
+  const isDark = mytheme === 'dark';
+
+  const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: 10,
     total: 0,
   });
-  const [searchText, setSearchText] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [form] = Form.useForm();
   const [visibleKeys, setVisibleKeys] = useState<Set<number>>(new Set());
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<ApiKeyItem | null>(null);
+  const [groups, setGroups] = useState<Record<string, GroupInfo>>({});
+  const [unlimitedQuota, setUnlimitedQuota] = useState(true);
+  const [quotaValue, setQuotaValue] = useState(0);
+  const [form] = Form.useForm();
 
-  // 获取API密钥列表
-  const fetchApiKeys = async (page: number = 1, size: number = 10) => {
+  const fetchApiKeys = useCallback(async (page = 1, size = 10) => {
     setLoading(true);
     try {
-      const response = await axios.get<ApiResponse>('/token/', {
-        params: {
-          p: page,
-          size: size,
-        },
+      const res = await apiClient.get<ApiResponse>('/token/', {
+        params: { p: page, size },
       });
-
-      if (response.data.success) {
-        const items = response.data.data.items.map((item) => ({
-          ...item,
-          visibleKey: false,
+      if (res.data.success) {
+        setApiKeys(res.data.data.items);
+        setPagination((p) => ({
+          ...p,
+          current: res.data.data.page,
+          pageSize: res.data.data.page_size,
+          total: res.data.data.total,
         }));
-        setApiKeys(items);
-        setPagination({
-          current: response.data.data.page,
-          pageSize: response.data.data.page_size,
-          total: response.data.data.total,
-        });
-      } else {
-        message.error(response.data.message || t('apiKeys.title'));
       }
-    } catch (error) {
-      console.error('Error fetching API keys:', error);
-      message.error(t('apiKeys.title'));
+    } catch {
+      /* ignore */
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchApiKeys(pagination.current || 1, pagination.pageSize || 10);
   }, []);
 
-  // 格式化时间戳
-  const formatTimestamp = (timestamp: number): string => {
-    if (!timestamp || timestamp === -1) return 'Permanent';
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleString('en-US');
+  const fetchGroups = useCallback(async () => {
+    try {
+      const res = await apiClient.get('/user/self/groups');
+      if (res.data.success) setGroups(res.data.data || {});
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchApiKeys();
+    fetchGroups();
+  }, [fetchApiKeys, fetchGroups]);
+
+  const formatTime = (ts: number) =>
+    !ts || ts <= 0
+      ? t('apiKeys.unlimited')
+      : new Date(ts * 1000).toLocaleString('zh-CN');
+  const getExpiryLabel = (ts: number) => {
+    if (!ts || ts <= 0) return t('apiKeys.unlimited');
+    const days = Math.ceil((ts - Date.now() / 1000) / 86400);
+    if (days < 0) return '已过期';
+    return `${days} 天后过期`;
   };
 
-  // Get days difference
-  const getDaysDiff = (timestamp: number): string => {
-    if (!timestamp || timestamp === -1) return 'Permanent';
-    const now = Date.now() / 1000;
-    const days = Math.ceil((timestamp - now) / (24 * 3600));
-    if (days < 0) return 'Expired';
-    if (!isFinite(days)) return 'Permanent';
-    return `Expires in ${Math.max(0, days)} days`;
-  };
+  const handleToggleVisibility = (id: number) =>
+    setVisibleKeys((p) => {
+      const n = new Set(p);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
 
-  const handleCreateKey = () => {
+  const handleCopyKey = (key: string) =>
+    navigator.clipboard
+      .writeText(key)
+      .then(() => message.success(t('apiKeys.copySuccess')));
+
+  const openCreateModal = () => {
+    setEditingRecord(null);
+    setUnlimitedQuota(true);
+    setQuotaValue(0);
     form.resetFields();
+    form.setFieldsValue({
+      count: 1,
+      unlimited_quota: true,
+      expired_time: null,
+    });
     setIsModalVisible(true);
+  };
+
+  const openEditModal = (record: ApiKeyItem) => {
+    setEditingRecord(record);
+    setUnlimitedQuota(record.unlimited_quota);
+    setQuotaValue(record.remain_quota > 0 ? record.remain_quota : 0);
+    form.setFieldsValue({
+      name: record.name,
+      group: record.group || undefined,
+      expired_time:
+        record.expired_time > 0 ? dayjs.unix(record.expired_time) : null,
+      unlimited_quota: record.unlimited_quota,
+      quota: record.remain_quota > 0 ? record.remain_quota / 500000 : 0,
+      model_limits_enabled: record.model_limits_enabled,
+      model_limits: record.model_limits,
+      allow_ips: record.allow_ips,
+    });
+    setIsModalVisible(true);
+  };
+
+  const setExpiryQuick = (type: 'never' | 'month' | 'day' | 'hour') => {
+    if (type === 'never') {
+      form.setFieldValue('expired_time', null);
+      return;
+    }
+    const now = dayjs();
+    const map = {
+      month: now.add(1, 'month'),
+      day: now.add(1, 'day'),
+      hour: now.add(1, 'hour'),
+    };
+    form.setFieldValue('expired_time', map[type]);
   };
 
   const handleModalOk = async () => {
     try {
-      await form.validateFields();
-      message.success(t('apiKeys.title'));
+      const values = await form.validateFields();
+      setSubmitting(true);
+      const payload: any = {
+        name: values.name,
+        group: values.group || '',
+        expired_time: values.expired_time
+          ? Math.floor((values.expired_time as Dayjs).valueOf() / 1000)
+          : -1,
+        unlimited_quota: values.unlimited_quota ?? true,
+        remain_quota: values.unlimited_quota
+          ? 0
+          : Math.floor((values.quota || 0) * 500000),
+        model_limits_enabled: values.model_limits_enabled ?? false,
+        model_limits: values.model_limits || '',
+        allow_ips: values.allow_ips || '',
+      };
+      if (editingRecord) {
+        const res = await apiClient.put(`/token/${editingRecord.id}`, payload);
+        if (res.data.success === false) {
+          message.error(res.data.message || t('apiKeys.updateFailed'));
+          return;
+        }
+        message.success(t('apiKeys.updateSuccess'));
+      } else {
+        const count = values.count || 1;
+        for (let i = 0; i < count; i++) {
+          const name =
+            count > 1
+              ? `${values.name}_${Math.random().toString(36).slice(2, 6)}`
+              : values.name;
+          const res = await apiClient.post('/token/', { ...payload, name });
+          if (res.data.success === false) {
+            message.error(res.data.message || t('apiKeys.createFailed'));
+            return;
+          }
+        }
+        message.success(t('apiKeys.createSuccess'));
+      }
       setIsModalVisible(false);
-      fetchApiKeys(pagination.current || 1, pagination.pageSize || 10);
-    } catch (error) {
-      console.error('Validation failed:', error);
+      fetchApiKeys(
+        editingRecord ? (pagination.current as number) : 1,
+        pagination.pageSize as number
+      );
+    } catch {
+      /* validation */
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleCopyKey = (keyText: string) => {
-    navigator.clipboard.writeText(keyText);
-    message.success(t('apiKeys.copy'));
-  };
-
-  const handleToggleVisibility = (id: number) => {
-    const newVisibleKeys = new Set(visibleKeys);
-    if (newVisibleKeys.has(id)) {
-      newVisibleKeys.delete(id);
-    } else {
-      newVisibleKeys.add(id);
+  const handleDelete = async (id: number) => {
+    try {
+      const res = await apiClient.delete(`/token/${id}`);
+      if (res.data.success === false) {
+        message.error(res.data.message || t('apiKeys.deleteFailed'));
+        return;
+      }
+      message.success(t('apiKeys.deleteSuccess'));
+      fetchApiKeys(pagination.current as number, pagination.pageSize as number);
+    } catch {
+      message.error(t('apiKeys.deleteFailed'));
     }
-    setVisibleKeys(newVisibleKeys);
   };
 
-  const handleDeleteKey = () => {
-    message.info('Delete functionality under development');
-  };
+  const groupOptions = Object.entries(groups).map(([k, v]) => ({
+    label: v.desc ? `${k} (${v.desc})` : k,
+    value: k,
+  }));
 
-  const handleTableChange = (newPagination: TablePaginationConfig) => {
-    fetchApiKeys(newPagination.current || 1, newPagination.pageSize || 10);
-  };
-
-  const columns: ColumnsType<DisplayKey> = [
-    {
-      title: t('apiKeys.name'),
-      dataIndex: 'name',
-      key: 'name',
-      width: 120,
-      render: (text) => <span>{text || '-'}</span>,
-    },
+  const columns: ColumnsType<ApiKeyItem> = [
+    { title: t('apiKeys.name'), dataIndex: 'name', key: 'name', width: 120 },
     {
       title: t('apiKeys.apiKey'),
       dataIndex: 'key',
       key: 'key',
-      width: 200,
+      width: 260,
       render: (_, record) => (
-        <Space size="small">
+        <Space size={4}>
           <span style={{ fontFamily: 'monospace', fontSize: '12px' }}>
-            {visibleKeys.has(record.id)
-              ? record.key
-              : record.key.substring(0, 8) + '**...'}
+            {record.key}
           </span>
-          <Button
-            type="text"
-            size="small"
-            icon={
-              visibleKeys.has(record.id) ? (
-                <EyeInvisibleOutlined />
-              ) : (
-                <EyeOutlined />
-              )
-            }
-            onClick={() => handleToggleVisibility(record.id)}
-          />
-          <Button
-            type="text"
-            size="small"
-            icon={<CopyOutlined />}
-            onClick={() => handleCopyKey(record.key)}
-          />
-        </Space>
-      ),
-    },
-    {
-      title: t('apiKeys.group'),
-      dataIndex: 'group',
-      key: 'group',
-      width: 100,
-      filters: [{ text: 'default', value: 'default' }],
-      onFilter: (value, record) => record.group === value,
-    },
-    {
-      title: t('apiKeys.status'),
-      dataIndex: 'status',
-      key: 'status',
-      width: 80,
-      render: (status: number) => {
-        const statusConfig: Record<number, { color: string; text: string }> = {
-          1: { color: 'green', text: t('apiKeys.active') },
-          0: { color: 'orange', text: t('apiKeys.inactive') },
-        };
-        const config = statusConfig[status] || statusConfig[0];
-        return <Tag color={config.color}>{config.text}</Tag>;
-      },
-      filters: [
-        { text: t('apiKeys.active'), value: 1 },
-        { text: t('apiKeys.inactive'), value: 0 },
-      ],
-      onFilter: (value, record) => record.status === value,
-    },
-    {
-      title: t('apiKeys.quotaType'),
-      dataIndex: 'unlimited_quota',
-      key: 'quota',
-      width: 90,
-      render: (unlimited: boolean) => {
-        return unlimited ? (
-          <Tag color="blue">{t('apiKeys.unlimited')}</Tag>
-        ) : (
-          <span>{t('apiKeys.limited')}</span>
-        );
-      },
-    },
-    {
-      title: t('apiKeys.usedQuota'),
-      dataIndex: 'used_quota',
-      key: 'used_quota',
-      width: 100,
-      render: (used: number) => <span>${(used / 1000000).toFixed(4)}</span>,
-    },
-    {
-      title: t('apiKeys.remainingQuota'),
-      dataIndex: 'remain_quota',
-      key: 'remain_quota',
-      width: 100,
-      render: (remain: number) => <span>${(remain / 1000000).toFixed(4)}</span>,
-    },
-    {
-      title: t('apiKeys.expiry'),
-      dataIndex: 'expired_time',
-      key: 'expired_time',
-      width: 130,
-      render: (time: number) => (
-        <Tooltip title={formatTimestamp(time)}>
-          <span>{getDaysDiff(time)}</span>
-        </Tooltip>
-      ),
-    },
-    {
-      title: t('apiKeys.createdAt'),
-      dataIndex: 'created_time',
-      key: 'created_time',
-      width: 180,
-      render: (time: number) => formatTimestamp(time),
-    },
-    {
-      title: t('apiKeys.lastAccessed'),
-      dataIndex: 'accessed_time',
-      key: 'accessed_time',
-      width: 180,
-      render: (time: number) => (time > 0 ? formatTimestamp(time) : 'Not used'),
-    },
-    {
-      title: t('apiKeys.actions'),
-      key: 'action',
-      width: 120,
-      fixed: 'right',
-      render: (_, record) => (
-        <Space size="small">
+          <Tooltip title={visibleKeys.has(record.id) ? '隐藏' : '显示'}>
+            <Button
+              type="text"
+              size="small"
+              icon={
+                visibleKeys.has(record.id) ? (
+                  <EyeInvisibleOutlined />
+                ) : (
+                  <EyeOutlined />
+                )
+              }
+              onClick={() => handleToggleVisibility(record.id)}
+            />
+          </Tooltip>
           <Tooltip title={t('apiKeys.copy')}>
             <Button
               type="text"
@@ -312,137 +305,421 @@ export const ApiKeysPage = () => {
               onClick={() => handleCopyKey(record.key)}
             />
           </Tooltip>
+        </Space>
+      ),
+    },
+    { title: t('apiKeys.group'), dataIndex: 'group', key: 'group', width: 120 },
+    {
+      title: t('apiKeys.status'),
+      dataIndex: 'status',
+      key: 'status',
+      width: 80,
+      render: (s) =>
+        s === 1 ? (
+          <Tag color="success">{t('apiKeys.active')}</Tag>
+        ) : (
+          <Tag color="warning">{t('apiKeys.inactive')}</Tag>
+        ),
+    },
+    {
+      title: t('apiKeys.quotaType'),
+      dataIndex: 'unlimited_quota',
+      key: 'quota',
+      width: 90,
+      render: (u) =>
+        u ? (
+          <Tag color="blue">{t('apiKeys.unlimited')}</Tag>
+        ) : (
+          <Tag>{t('apiKeys.limited')}</Tag>
+        ),
+    },
+    {
+      title: t('apiKeys.usedQuota'),
+      dataIndex: 'used_quota',
+      key: 'used_quota',
+      width: 110,
+      render: (v) => `$${(v / 500000).toFixed(4)}`,
+    },
+    {
+      title: t('apiKeys.remainingQuota'),
+      dataIndex: 'remain_quota',
+      key: 'remain_quota',
+      width: 110,
+      render: (v, r) =>
+        r.unlimited_quota ? '∞' : `$${(v / 500000).toFixed(4)}`,
+    },
+    {
+      title: t('apiKeys.expiry'),
+      dataIndex: 'expired_time',
+      key: 'expired_time',
+      width: 130,
+      render: (ts) => (
+        <Tooltip title={formatTime(ts)}>
+          <span>{getExpiryLabel(ts)}</span>
+        </Tooltip>
+      ),
+    },
+    {
+      title: t('apiKeys.createdAt'),
+      dataIndex: 'created_time',
+      key: 'created_time',
+      width: 170,
+      render: (ts) => formatTime(ts),
+    },
+    {
+      title: t('apiKeys.lastAccessed'),
+      dataIndex: 'accessed_time',
+      key: 'accessed_time',
+      width: 170,
+      render: (ts) => (ts > 0 ? formatTime(ts) : '-'),
+    },
+    {
+      title: t('apiKeys.actions'),
+      key: 'action',
+      width: 100,
+      fixed: 'right',
+      render: (_, record) => (
+        <Space size={4}>
           <Tooltip title={t('apiKeys.edit')}>
-            <Button type="text" size="small" icon={<EditOutlined />} disabled />
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => openEditModal(record)}
+            />
           </Tooltip>
           <Popconfirm
             title={t('apiKeys.deleteConfirmTitle')}
             description={t('apiKeys.deleteConfirmDesc')}
-            onConfirm={handleDeleteKey}
+            onConfirm={() => handleDelete(record.id)}
             okText={t('apiKeys.confirm')}
             cancelText={t('apiKeys.cancel')}
+            okButtonProps={{ danger: true }}
           >
-            <Button
-              type="text"
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-              disabled
-            />
+            <Tooltip title={t('apiKeys.delete')}>
+              <Button
+                type="text"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+              />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
     },
   ];
 
+  const sectionStyle: React.CSSProperties = {
+    background: isDark ? 'rgba(255,255,255,0.04)' : '#f9f9f9',
+    border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#e8e8e8'}`,
+    borderRadius: 8,
+    padding: '16px 16px 12px',
+    marginBottom: 16,
+  };
+  const sectionHeaderStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  };
+
   return (
     <>
-      <Card style={{ marginBottom: '24px' }}>
+      <Card>
         <Flex
           justify="space-between"
           align="center"
-          wrap="wrap"
-          gap="middle"
-          style={{ marginBottom: '16px' }}
+          style={{ marginBottom: 16 }}
         >
-          <Space wrap>
-            <Input.Search
-              placeholder={t('apiKeys.searchPlaceholder')}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 300 }}
-              enterButton
-            />
-            <Select
-              placeholder={t('apiKeys.allGroups')}
-              value={selectedGroup}
-              onChange={setSelectedGroup}
-              style={{ width: 150 }}
-              allowClear
-              options={[{ label: 'default', value: 'default' }]}
-            />
-            <Select
-              placeholder={t('apiKeys.allStatus')}
-              value={selectedStatus}
-              onChange={setSelectedStatus}
-              style={{ width: 150 }}
-              allowClear
-              options={[
-                { label: t('apiKeys.active'), value: '1' },
-                { label: t('apiKeys.inactive'), value: '0' },
-              ]}
-            />
-          </Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleCreateKey}
-            disabled
-          >
-            Create Key
-          </Button>
-        </Flex>
-
-        <Spin spinning={loading}>
-          <Table
-            columns={columns}
-            dataSource={apiKeys}
-            rowKey="id"
-            pagination={{
-              ...pagination,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} records`,
-              pageSizeOptions: ['10', '20', '50', '100'],
-            }}
-            onChange={handleTableChange}
-            scroll={{ x: 1600 }}
-            size="middle"
+          <Input.Search
+            placeholder={t('apiKeys.searchPlaceholder')}
+            style={{ width: 280 }}
+            allowClear
           />
-        </Spin>
+          <Space>
+            <Tooltip title="刷新">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={() =>
+                  fetchApiKeys(
+                    pagination.current as number,
+                    pagination.pageSize as number
+                  )
+                }
+                loading={loading}
+              />
+            </Tooltip>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={openCreateModal}
+            >
+              {t('apiKeys.createKey')}
+            </Button>
+          </Space>
+        </Flex>
+        <Table
+          columns={columns}
+          dataSource={apiKeys}
+          rowKey="id"
+          loading={loading}
+          pagination={{
+            ...pagination,
+            showSizeChanger: true,
+            showTotal: (total) => `共 ${total} 条`,
+            pageSizeOptions: ['10', '20', '50'],
+          }}
+          onChange={(pg) => fetchApiKeys(pg.current || 1, pg.pageSize || 10)}
+          scroll={{ x: 1400 }}
+          size="middle"
+        />
       </Card>
 
       <Modal
-        title={t('apiKeys.title')}
+        title={
+          <Space>
+            <Tag color="blue" style={{ margin: 0 }}>
+              {editingRecord ? '编辑' : '新建'}
+            </Tag>
+            {editingRecord ? t('apiKeys.editKey') : '创建新的令牌'}
+          </Space>
+        }
         open={isModalVisible}
         onOk={handleModalOk}
         onCancel={() => setIsModalVisible(false)}
-        okText={t('apiKeys.confirm')}
-        cancelText={t('apiKeys.cancel')}
+        okText={
+          <Space>
+            <span>提交</span>
+          </Space>
+        }
+        cancelText="取消"
+        confirmLoading={submitting}
+        destroyOnClose
+        width={560}
+        okButtonProps={{ icon: <span>💾</span> }}
+        cancelButtonProps={{ icon: <span>✗</span> }}
       >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            label="Key Name"
-            name="name"
-            rules={[{ required: true, message: 'Please enter key name' }]}
-          >
-            <Input placeholder="e.g: My API Key" />
-          </Form.Item>
-          <Form.Item
-            label={t('apiKeys.group')}
-            name="group"
-            initialValue="default"
-            rules={[{ required: true, message: 'Please select a group' }]}
-          >
-            <Select
-              placeholder="Select a group"
-              options={[{ label: 'default', value: 'default' }]}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Allowed IPs"
-            name="allow_ips"
-            tooltip="Leave blank to allow all IPs"
-          >
-            <Input placeholder="e.g: 192.168.1.1,192.168.1.2" />
-          </Form.Item>
-          <Form.Item
-            label="Enable Model Restrictions"
-            name="model_limits_enabled"
-            valuePropName="checked"
-            initialValue={false}
-          >
-            <Switch />
-          </Form.Item>
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          {/* 基本信息 */}
+          <div style={sectionStyle}>
+            <div style={sectionHeaderStyle}>
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: '#1677ff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <KeyOutlined style={{ color: '#fff', fontSize: 14 }} />
+              </div>
+              <div>
+                <Text strong>基本信息</Text>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    设置令牌的基本信息
+                  </Text>
+                </div>
+              </div>
+            </div>
+
+            <Form.Item
+              label={
+                <>
+                  名称 <span style={{ color: 'red' }}>*</span>
+                </>
+              }
+              name="name"
+              rules={[{ required: true, message: '请输入名称' }]}
+              style={{ marginBottom: 12 }}
+            >
+              <Input placeholder="请输入令牌名称" />
+            </Form.Item>
+
+            <Form.Item
+              label="令牌分组"
+              name="group"
+              style={{ marginBottom: 12 }}
+            >
+              <Select
+                placeholder="请选择分组"
+                options={groupOptions}
+                allowClear
+                showSearch
+              />
+            </Form.Item>
+
+            <Flex gap={12} align="flex-start">
+              <Form.Item
+                label={
+                  <>
+                    过期时间 <span style={{ color: 'red' }}>*</span>
+                  </>
+                }
+                name="expired_time"
+                style={{ flex: 1, marginBottom: 12 }}
+              >
+                <DatePicker
+                  showTime
+                  style={{ width: '100%' }}
+                  placeholder="1970-01-01 07:59:59"
+                />
+              </Form.Item>
+              <Form.Item label="过期时间快捷设置" style={{ marginBottom: 12 }}>
+                <Space>
+                  <Button
+                    size="small"
+                    type="primary"
+                    onClick={() => setExpiryQuick('never')}
+                  >
+                    永不过期
+                  </Button>
+                  <Button size="small" onClick={() => setExpiryQuick('month')}>
+                    一个月
+                  </Button>
+                  <Button size="small" onClick={() => setExpiryQuick('day')}>
+                    一天
+                  </Button>
+                  <Button size="small" onClick={() => setExpiryQuick('hour')}>
+                    一小时
+                  </Button>
+                </Space>
+              </Form.Item>
+            </Flex>
+
+            {!editingRecord && (
+              <Form.Item
+                label={
+                  <>
+                    新建数量 <span style={{ color: 'red' }}>*</span>
+                  </>
+                }
+                name="count"
+                initialValue={1}
+                rules={[{ required: true }]}
+                style={{ marginBottom: 4 }}
+              >
+                <InputNumber min={1} max={100} style={{ width: '100%' }} />
+              </Form.Item>
+            )}
+            {!editingRecord && (
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                批量创建时会在名称后自动添加随机后缀
+              </Text>
+            )}
+          </div>
+
+          {/* 额度设置 */}
+          <div style={sectionStyle}>
+            <div style={sectionHeaderStyle}>
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: '#52c41a',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <SafetyOutlined style={{ color: '#fff', fontSize: 14 }} />
+              </div>
+              <div>
+                <Text strong>额度设置</Text>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    设置令牌可用额度和数量
+                  </Text>
+                </div>
+              </div>
+            </div>
+
+            <Form.Item
+              label="额度"
+              name="quota"
+              initialValue={0}
+              style={{ marginBottom: 4 }}
+            >
+              <InputNumber
+                min={0}
+                style={{ width: '100%' }}
+                disabled={unlimitedQuota}
+                onChange={(v) => setQuotaValue(v || 0)}
+              />
+            </Form.Item>
+            <Text
+              type="secondary"
+              style={{ fontSize: 12, display: 'block', marginBottom: 12 }}
+            >
+              等价金额: ${((quotaValue || 0) / 500000).toFixed(2)}
+            </Text>
+
+            <Form.Item
+              label="无限额度"
+              name="unlimited_quota"
+              valuePropName="checked"
+              initialValue={true}
+              style={{ marginBottom: 4 }}
+            >
+              <Switch onChange={(v) => setUnlimitedQuota(v)} />
+            </Form.Item>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              令牌的额度仅用于限制令牌本身的最大额度使用量，实际的使用受到账户的剩余额度限制
+            </Text>
+          </div>
+
+          {/* 访问限制 */}
+          <div style={sectionStyle}>
+            <div style={sectionHeaderStyle}>
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: '#722ed1',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <LockOutlined style={{ color: '#fff', fontSize: 14 }} />
+              </div>
+              <div>
+                <Text strong>访问限制</Text>
+                <div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    设置令牌的访问限制
+                  </Text>
+                </div>
+              </div>
+            </div>
+
+            <Form.Item
+              label={
+                <>
+                  IP白名单{' '}
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    (支持CIDR表达式)
+                  </Text>
+                </>
+              }
+              name="allow_ips"
+              style={{ marginBottom: 4 }}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder={'允许的IP，一行一个，不填写则不限制'}
+              />
+            </Form.Item>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              请勿过度信任此功能，IP可能被伪造，请配合nginx和cdn等网关使用
+            </Text>
+          </div>
         </Form>
       </Modal>
     </>

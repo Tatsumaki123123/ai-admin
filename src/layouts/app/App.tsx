@@ -4,7 +4,6 @@ import {
   FloatButton,
   Layout,
   MenuProps,
-  message,
   theme,
   Tooltip,
   Divider,
@@ -37,11 +36,9 @@ import { Sidebar, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from './Sidebar.tsx';
 import HeaderNav from './HeaderNav.tsx';
 import FooterNav from './FooterNav.tsx';
 import { NProgress, LoginModal } from '../../components';
-import { PATH_LANDING } from '../../constants';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from '../../redux/theme/themeSlice.ts';
-import { logoutUser, setToken, setUser } from '../../redux/auth/authSlice';
-import { enableMockData } from '../../redux/dataMode/dataModeSlice';
+import { setToken, setUser, clearAuth } from '../../redux/auth/authSlice';
 import { RootState } from '../../redux/store.ts';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -75,7 +72,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const { user, isAuthenticated } = useSelector(
     (state: RootState) => state.auth
   );
-  const { user: authUser } = useAuth();
+  const { user: authUser, logout: authLogout } = useAuth();
   const { i18n } = useTranslation();
   const currentLang = i18n.language?.startsWith('zh') ? 'zh' : 'en';
   const displayName =
@@ -108,22 +105,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   );
 
   const handleLogout = async () => {
-    message.open({
-      type: 'loading',
-      content: 'signing you out',
-    });
-
-    // If authenticated, logout from API
-    if (isAuthenticated && user?.email) {
-      await dispatch(logoutUser(user.email) as any);
-    }
-
-    // Switch back to mock data mode
-    dispatch(enableMockData());
-
-    setTimeout(() => {
-      navigate(PATH_LANDING.root);
-    }, 1000);
+    await authLogout();
+    dispatch(clearAuth());
+    navigate('/auth/signin', { replace: true });
   };
 
   const items: MenuProps['items'] = [

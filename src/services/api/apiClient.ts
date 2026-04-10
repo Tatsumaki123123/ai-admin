@@ -24,8 +24,7 @@ import {
 console.log('[API Client] Module loaded!');
 
 // API Configuration
-const API_HOST =
-  import.meta.env.VITE_API_BASE_URL || 'https://ai.soulaicoin.pro';
+const API_HOST = import.meta.env.VITE_API_BASE_URL || 'https://ai.apecode.site';
 // Only append /api if not already present
 const API_BASE_URL = API_HOST.endsWith('/api') ? API_HOST : `${API_HOST}/api`;
 
@@ -114,8 +113,17 @@ apiClient.interceptors.request.use(
     }
 
     // For live mode or when no mock mapping exists
-    // Session-based auth: No need to add Authorization header
-    // Browser automatically sends session Cookie due to withCredentials: true
+    // new-api uses Authorization header with access_token
+    const accessToken = tokenStorage.getAccessToken();
+    if (accessToken && config.headers) {
+      config.headers['Authorization'] = accessToken;
+    }
+
+    // Attach user id header required by new-api
+    const currentUser = tokenStorage.getUser();
+    if (currentUser?.id && config.headers) {
+      config.headers['new-api-user'] = String(currentUser.id);
+    }
 
     // Log request in development
     if (import.meta.env.DEV) {

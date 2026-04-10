@@ -8,8 +8,10 @@ export default defineConfig({
     port: 5174,
     proxy: {
       '/api': {
-        target: 'https://ai.soulaicoin.pro',
+        target: 'https://ai.apecode.site',
         changeOrigin: true,
+        secure: false,
+        cookieDomainRewrite: { '*': '' },
       },
     },
   },

@@ -6,6 +6,7 @@
 
 const USER_KEY = 'user';
 const SESSION_FLAG_KEY = 'sessionActive';
+const ACCESS_TOKEN_KEY = 'access_token';
 
 export const tokenStorage = {
   /**
@@ -31,6 +32,7 @@ export const tokenStorage = {
   clearAuth: (): void => {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(SESSION_FLAG_KEY);
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
   },
 
   /**
@@ -42,17 +44,12 @@ export const tokenStorage = {
     return !!tokenStorage.getUser();
   },
 
-  /**
-   * Legacy methods kept for backward compatibility
-   * These are no longer used in Session-based auth but kept to avoid breaking existing code
-   */
-  setAccessToken: (): void => {
-    // No-op for session-based auth
+  setAccessToken: (token: string): void => {
+    localStorage.setItem(ACCESS_TOKEN_KEY, token);
   },
 
   getAccessToken: (): string | null => {
-    // Session-based auth doesn't use tokens
-    return null;
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
   },
 
   setRefreshToken: (): void => {

@@ -6,7 +6,7 @@
 export const API_CONFIG = {
   // Base URLs for different environments
   MOCK_BASE_URL: '/mocks',
-  PROD_BASE_URL: 'https://ai.soulaicoin.pro/',
+  PROD_BASE_URL: 'https://ai.apecode.site/',
 
   // API version and dashboard prefix
   API_VERSION: '/api/v1',

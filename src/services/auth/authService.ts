@@ -54,12 +54,16 @@ export const authService = {
 
       tokenStorage.setUser(userData);
 
-      // Verify storage
-      if (import.meta.env.DEV) {
-        console.log('[Auth Service] User stored. Verification:', {
-          isAuthenticated: tokenStorage.isAuthenticated(),
-          storedUser: tokenStorage.getUser(),
-        });
+      // Fetch access_token from /user/token using the session cookie just set
+      try {
+        const tokenResp = await apiRequest.get<any>('/user/token');
+        const accessToken =
+          tokenResp?.token || tokenResp?.data?.token || tokenResp?.access_token;
+        if (accessToken) {
+          tokenStorage.setAccessToken(accessToken);
+        }
+      } catch {
+        // Non-fatal: access_token will be fetched on next request if needed
       }
     }
 
