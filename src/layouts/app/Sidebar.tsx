@@ -30,9 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
   const location = useLocation();
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const isDark = mytheme === 'dark';
-  const normalizedPathname = location.pathname.startsWith('/app/')
-    ? location.pathname.replace('/app', '')
-    : location.pathname;
+  const normalizedPathname = location.pathname;
 
   const menuItems: MenuProps['items'] = [
     {
