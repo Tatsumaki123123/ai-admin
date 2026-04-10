@@ -1,4 +1,4 @@
-import { ConfigProvider, Layout, Menu, MenuProps } from 'antd';
+import { ConfigProvider, Menu, MenuProps } from 'antd';
 import {
   DashboardOutlined,
   KeyOutlined,
@@ -16,8 +16,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import logoImg from '../../assets/logo.png';
 import { PRIMARY_COLOR, hexToRgba } from '../../theme/colors';
-
-const { Sider } = Layout;
 
 export const SIDEBAR_WIDTH = 256;
 export const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -96,12 +94,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
       .map((item: any) => item?.key as string)[0] || '/dashboard';
 
   return (
-    <Sider
-      trigger={null}
-      collapsed={collapsed}
-      width={SIDEBAR_WIDTH}
-      collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
+    <div
       style={{
+        width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
+        minWidth: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
         background: isDark ? '#141414' : '#fff',
         borderRight: `1px solid ${
           isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'
@@ -111,6 +107,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
         top: 0,
         bottom: 0,
         zIndex: 99,
+        overflow: 'hidden',
+        transition: 'width 0.2s cubic-bezier(0.2, 0, 0, 1)',
       }}
     >
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -162,6 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
             flex: 1,
             overflow: 'hidden auto',
             padding: '8px 0 16px',
+            overscrollBehavior: 'contain',
           }}
         >
           <ConfigProvider
@@ -178,6 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
             <Menu
               mode="inline"
               selectedKeys={[selectedKey]}
+              inlineCollapsed={collapsed}
               items={menuItems}
               style={{ background: 'transparent', border: 'none' }}
               theme={isDark ? 'dark' : 'light'}
@@ -217,6 +217,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
           </div>
         </div>
       </div>
-    </Sider>
+    </div>
   );
 };

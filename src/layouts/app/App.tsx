@@ -7,13 +7,19 @@ import {
   message,
   theme,
   Tooltip,
-  Switch,
   Divider,
   Badge,
   Typography,
 } from 'antd';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   LogoutOutlined,
   QuestionOutlined,
@@ -23,20 +29,11 @@ import {
   SunOutlined,
   BellOutlined,
   FileTextOutlined,
-  GlobalOutlined,
   DollarOutlined,
+  CaretDownOutlined,
 } from '@ant-design/icons';
-import {
-  CSSTransition,
-  SwitchTransition,
-  TransitionGroup,
-} from 'react-transition-group';
 import { useMediaQuery } from 'react-responsive';
-import {
-  Sidebar,
-  SIDEBAR_COLLAPSED_WIDTH,
-  SIDEBAR_WIDTH,
-} from './Sidebar.tsx';
+import { Sidebar, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from './Sidebar.tsx';
 import HeaderNav from './HeaderNav.tsx';
 import FooterNav from './FooterNav.tsx';
 import { NProgress, LoginModal } from '../../components';
@@ -51,7 +48,8 @@ import {
   PageContextProvider,
   PageHeaderState,
 } from '../../hooks/usePageContext';
-import { PRIMARY_COLOR, hexToRgba } from '../../theme/colors';
+import { PRIMARY_COLOR } from '../../theme/colors';
+import { useTranslation } from 'react-i18next';
 const { Content } = Layout;
 
 type AppLayoutProps = {
@@ -63,16 +61,14 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     token: { borderRadius },
   } = theme.useToken();
   const isMobile = useMediaQuery({ maxWidth: 769 });
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const [navFill, setNavFill] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [pageHeader, setPageHeader] = useState<PageHeaderState>({
     title: null,
     description: null,
   });
   const location = useLocation();
   const navigate = useNavigate();
-  const nodeRef = useRef(null);
   const floatBtnRef = useRef(null);
   const dispatch = useDispatch();
   const { mytheme } = useSelector((state: RootState) => state.theme);
@@ -80,13 +76,15 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     (state: RootState) => state.auth
   );
   const { user: authUser } = useAuth();
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language?.startsWith('zh') ? 'zh' : 'en';
   const displayName =
     (authUser as any)?.display_name ||
     (authUser as any)?.username ||
     (authUser as any)?.email?.split('@')[0] ||
     user?.email?.split('@')[0] ||
     'User';
-  const userInitials = displayName.substring(0, 2).toUpperCase();
+  const userInitials = displayName.substring(0, 1).toUpperCase();
   const userRole = (authUser as any)?.role === 0 ? 'Admin' : 'User';
   const userBalance = `$${(((authUser as any)?.quota || 0) / 500000).toFixed(
     2
@@ -157,10 +155,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   ];
 
   useEffect(() => {
-    setCollapsed(isMobile);
-  }, [isMobile]);
-
-  useEffect(() => {
     window.addEventListener('scroll', () => {
       if (window.scrollY > 5) {
         setNavFill(true);
@@ -189,7 +183,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <>
-      <NProgress isAnimating={isLoading} key={location.key} />
+      <NProgress isAnimating={false} key={location.key} />
       <Layout
         style={{
           minHeight: '100vh',
@@ -316,31 +310,64 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               </Tooltip>
 
               {/* 语言选择 */}
-              <Tooltip title="语言">
+              <Dropdown
+                trigger={['click']}
+                placement="bottomRight"
+                menu={{
+                  selectedKeys: [currentLang],
+                  items: [
+                    {
+                      key: 'en',
+                      label: (
+                        <Flex align="center" gap={8}>
+                          <span>🇺🇸</span>
+                          <span>English</span>
+                        </Flex>
+                      ),
+                      onClick: () => i18n.changeLanguage('en'),
+                    },
+                    {
+                      key: 'zh',
+                      label: (
+                        <Flex align="center" gap={8}>
+                          <span>🇨🇳</span>
+                          <span>中文</span>
+                        </Flex>
+                      ),
+                      onClick: () => i18n.changeLanguage('zh'),
+                    },
+                  ],
+                }}
+              >
                 <Flex
                   align="center"
-                  gap={4}
+                  gap={3}
                   style={{
                     cursor: 'pointer',
-                    padding: '4px 8px',
+                    padding: '2px 4px',
                     borderRadius: '4px',
-                    color: mytheme === 'dark' ? '#fff' : '#000',
+                    color: mytheme === 'dark' ? '#ccc' : '#555',
                     fontSize: '12px',
-                    border:
-                      mytheme === 'dark'
-                        ? '1px solid rgba(255,255,255,0.2)'
-                        : '1px solid rgba(0,0,0,0.1)',
+                    userSelect: 'none',
+                    transition: 'opacity 0.2s',
                   }}
                 >
-                  <GlobalOutlined style={{ fontSize: '14px' }} />
-                  <span style={{ display: isMobile ? 'none' : 'inline' }}>
-                    CN
+                  <span style={{ fontSize: '14px', lineHeight: 1 }}>
+                    {currentLang === 'zh' ? '🇨🇳' : '🇺🇸'}
                   </span>
-                  <span style={{ display: isMobile ? 'none' : 'inline' }}>
-                    ZH
+                  <span
+                    style={{
+                      display: isMobile ? 'none' : 'inline',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {currentLang === 'zh' ? '中文' : 'EN'}
                   </span>
+                  <CaretDownOutlined
+                    style={{ fontSize: '9px', opacity: 0.45 }}
+                  />
                 </Flex>
-              </Tooltip>
+              </Dropdown>
 
               <Divider
                 type="vertical"
@@ -355,13 +382,27 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
               {/* 主题切换 */}
               <Tooltip title={mytheme === 'dark' ? '浅色模式' : '深色模式'}>
-                <Switch
-                  checked={mytheme === 'dark'}
+                <div
                   onClick={() => dispatch(toggleTheme())}
-                  checkedChildren={<MoonOutlined />}
-                  unCheckedChildren={<SunOutlined />}
-                  style={{ marginRight: '4px' }}
-                />
+                  style={{
+                    cursor: 'pointer',
+                    width: 32,
+                    height: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    fontSize: '16px',
+                    color: mytheme === 'dark' ? '#fff' : '#555',
+                    background:
+                      mytheme === 'dark'
+                        ? 'rgba(255,255,255,0.08)'
+                        : 'rgba(0,0,0,0.04)',
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  {mytheme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+                </div>
               </Tooltip>
 
               {/* Balance */}
@@ -369,14 +410,15 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                 align="center"
                 gap={4}
                 style={{
-                  background: hexToRgba(PRIMARY_COLOR, 0.12),
-                  border: `1px solid ${hexToRgba(PRIMARY_COLOR, 0.28)}`,
+                  background: 'rgba(0, 185, 107, 0.1)',
+                  border: '1px solid rgba(0, 185, 107, 0.3)',
                   borderRadius: '20px',
-                  padding: '4px 12px',
+                  padding: '2px 10px',
                   cursor: 'pointer',
-                  color: PRIMARY_COLOR,
-                  fontSize: '13px',
+                  color: '#00b96b',
+                  fontSize: '12px',
                   fontWeight: '500',
+                  lineHeight: '20px',
                 }}
               >
                 <DollarOutlined style={{ fontSize: '14px' }} />
@@ -465,6 +507,14 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                       {userRole}
                     </span>
                   </Flex>
+                  <CaretDownOutlined
+                    style={{
+                      fontSize: '10px',
+                      opacity: 0.45,
+                      display: isMobile ? 'none' : 'inline',
+                      marginLeft: '2px',
+                    }}
+                  />
                 </Flex>
               </Dropdown>
             </Flex>
@@ -477,35 +527,13 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               marginTop: '64px',
               borderRadius: collapsed ? 0 : borderRadius,
               transition: 'all .25s',
-              padding: '32px',
+              padding: '20px 24px',
               minHeight: 360,
               background: mytheme === 'dark' ? '#000' : '#f5f5f5',
             }}
           >
             <PageContextProvider value={pageContextValue}>
-              <TransitionGroup>
-                <SwitchTransition>
-                  <CSSTransition
-                    key={`css-transition-${location.key}`}
-                    nodeRef={nodeRef}
-                    onEnter={() => {
-                      setIsLoading(true);
-                    }}
-                    onEntered={() => {
-                      setIsLoading(false);
-                    }}
-                    timeout={300}
-                    classNames="bottom-to-top"
-                    unmountOnExit
-                  >
-                    {() => (
-                      <div ref={nodeRef} style={{ background: 'none' }}>
-                        {children ?? <Outlet />}
-                      </div>
-                    )}
-                  </CSSTransition>
-                </SwitchTransition>
-              </TransitionGroup>
+              <div style={{ background: 'none' }}>{children ?? <Outlet />}</div>
             </PageContextProvider>
             <div ref={floatBtnRef}>
               <FloatButton.BackTop />
