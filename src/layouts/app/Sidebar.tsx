@@ -10,11 +10,11 @@ import {
   GiftOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  ArrowUpOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
+import logoImg from '../../assets/logo.png';
 
 const { Sider } = Layout;
 
@@ -112,77 +112,74 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         {/* Logo */}
         <div
-        style={{
-          height: '64px',
-          display: 'flex',
-          alignItems: 'center',
-          paddingLeft: collapsed ? '14px' : '20px',
-          borderBottom: `1px solid ${
-            isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'
-          }`,
-          overflow: 'hidden',
-          cursor: 'pointer',
-          flexShrink: 0,
-        }}
-        onClick={() => navigate('/dashboard')}
-      >
-        <div
           style={{
-            width: '32px',
-            height: '32px',
-            minWidth: '32px',
-            borderRadius: '8px',
-            background: 'linear-gradient(135deg, #00d589, #00b8d9)',
+            height: '64px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            paddingLeft: collapsed ? '14px' : '20px',
+            borderBottom: `1px solid ${
+              isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'
+            }`,
+            overflow: 'hidden',
+            cursor: 'pointer',
+            flexShrink: 0,
+          }}
+          onClick={() => navigate('/dashboard')}
+        >
+          <img
+            src={logoImg}
+            alt="logo"
+            style={{
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+              borderRadius: '8px',
+              objectFit: 'cover',
+            }}
+          />
+          {!collapsed && (
+            <span
+              style={{
+                marginLeft: '10px',
+                fontSize: '16px',
+                fontWeight: '600',
+                color: isDark ? '#fff' : '#1a1a1a',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ApeCode
+            </span>
+          )}
+        </div>
+
+        {/* Menu */}
+        <div
+          style={{
+            flex: 1,
+            overflow: 'hidden auto',
+            padding: '8px 0 16px',
           }}
         >
-          <ArrowUpOutlined style={{ color: '#fff', fontSize: '16px' }} />
-        </div>
-        {!collapsed && (
-          <span
-            style={{
-              marginLeft: '10px',
-              fontSize: '16px',
-              fontWeight: '600',
-              color: isDark ? '#fff' : '#1a1a1a',
-              whiteSpace: 'nowrap',
+          <ConfigProvider
+            theme={{
+              token: { colorPrimary: '#00c8a0' },
+              components: {
+                Menu: {
+                  itemSelectedBg: 'rgba(0, 200, 160, 0.1)',
+                  itemSelectedColor: '#00c8a0',
+                },
+              },
             }}
           >
-            XueDingToken
-          </span>
-        )}
-      </div>
-
-      {/* Menu */}
-      <div
-        style={{
-          flex: 1,
-          overflow: 'hidden auto',
-          padding: '8px 0 16px',
-        }}
-      >
-        <ConfigProvider
-          theme={{
-            token: { colorPrimary: '#00c8a0' },
-            components: {
-              Menu: {
-                itemSelectedBg: 'rgba(0, 200, 160, 0.1)',
-                itemSelectedColor: '#00c8a0',
-              },
-            },
-          }}
-        >
-          <Menu
-            mode="inline"
-            selectedKeys={[selectedKey]}
-            items={menuItems}
-            style={{ background: 'transparent', border: 'none' }}
-            theme={isDark ? 'dark' : 'light'}
-          />
-        </ConfigProvider>
-      </div>
+            <Menu
+              mode="inline"
+              selectedKeys={[selectedKey]}
+              items={menuItems}
+              style={{ background: 'transparent', border: 'none' }}
+              theme={isDark ? 'dark' : 'light'}
+            />
+          </ConfigProvider>
+        </div>
 
         {/* Bottom section */}
         <div

@@ -6,7 +6,7 @@ type FooterNavProps = React.HTMLAttributes<HTMLDivElement>;
 
 const FooterNav = ({ ...others }: FooterNavProps) => {
   return (
-    <Footer {...others}>AntD Dashboard © 2023 Created by Design Sparx</Footer>
+    <Footer {...others}>ApeCode © 2024 Created by AI Admin</Footer>
   );
 };
 

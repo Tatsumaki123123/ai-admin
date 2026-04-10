@@ -1,10 +1,6 @@
 import { Layout } from 'antd';
 import { ReactNode, useState } from 'react';
-import {
-  Sidebar,
-  SIDEBAR_COLLAPSED_WIDTH,
-  SIDEBAR_WIDTH,
-} from './Sidebar';
+import { Sidebar, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from './Sidebar';
 import { Topbar } from './Topbar';
 
 const { Content, Footer } = Layout;
@@ -50,7 +46,7 @@ export const AppPageLayout: React.FC<AppPageLayoutProps> = ({ children }) => {
             borderTop: '1px solid #f0f0f0',
           }}
         >
-          XueDingToken ©2024 Created by AI Admin
+          ApeCode ©2026 Created by Ape{' '}
         </Footer>
       </Layout>
     </Layout>

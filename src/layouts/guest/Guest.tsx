@@ -172,8 +172,7 @@ export const GuestLayout = () => {
             backgroundColor: 'rgba(52, 152, 219, 0.2)',
           }}
         >
-          AntD Dashboard &copy; {new Date().getFullYear()} Created by Design
-          Sparx
+          ApeCode &copy; {new Date().getFullYear()} Created by AI Admin
         </Footer>
       </Layout>
       <Drawer title="Menu" placement="left" onClose={onClose} open={open}>

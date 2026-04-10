@@ -36,7 +36,7 @@ export const UserProfileDetailsPage = () => {
           firstName: 'Kelvin',
           middleName: 'Kiptum',
           lastName: 'Kiprop',
-          company: 'Design Sparx',
+          company: 'ApeCode',
           email: 'kelvin.kiprop96@gmail.com',
           subscription: 'pro',
           status: 'active',
