@@ -1,6 +1,10 @@
 import { Layout } from 'antd';
 import { ReactNode, useState } from 'react';
-import { Sidebar } from './Sidebar';
+import {
+  Sidebar,
+  SIDEBAR_COLLAPSED_WIDTH,
+  SIDEBAR_WIDTH,
+} from './Sidebar';
 import { Topbar } from './Topbar';
 
 const { Content, Footer } = Layout;
@@ -20,7 +24,7 @@ export const AppPageLayout: React.FC<AppPageLayoutProps> = ({ children }) => {
       {/* 右侧内容 */}
       <Layout
         style={{
-          marginLeft: collapsed ? 80 : 200,
+          marginLeft: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
           transition: 'margin-left 0.2s',
         }}
       >

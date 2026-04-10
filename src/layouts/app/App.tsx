@@ -31,7 +31,11 @@ import {
   TransitionGroup,
 } from 'react-transition-group';
 import { useMediaQuery } from 'react-responsive';
-import { Sidebar } from './Sidebar.tsx';
+import {
+  Sidebar,
+  SIDEBAR_COLLAPSED_WIDTH,
+  SIDEBAR_WIDTH,
+} from './Sidebar.tsx';
 import HeaderNav from './HeaderNav.tsx';
 import FooterNav from './FooterNav.tsx';
 import { NProgress, LoginModal } from '../../components';
@@ -180,7 +184,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             style={{
               position: 'fixed',
               top: 0,
-              left: collapsed ? '60px' : '220px',
+              left: collapsed
+                ? `${SIDEBAR_COLLAPSED_WIDTH}px`
+                : `${SIDEBAR_WIDTH}px`,
               right: 0,
               padding: '0 2rem',
               background: navFill
@@ -407,7 +413,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           </HeaderNav>
           <Content
             style={{
-              marginLeft: collapsed ? '60px' : '220px',
+              marginLeft: collapsed
+                ? `${SIDEBAR_COLLAPSED_WIDTH}px`
+                : `${SIDEBAR_WIDTH}px`,
               marginTop: '64px',
               borderRadius: collapsed ? 0 : borderRadius,
               transition: 'all .25s',
@@ -446,7 +454,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           <FooterNav
             style={{
               textAlign: 'center',
-              marginLeft: collapsed ? '60px' : '220px',
+              marginLeft: collapsed
+                ? `${SIDEBAR_COLLAPSED_WIDTH}px`
+                : `${SIDEBAR_WIDTH}px`,
               background: 'none',
             }}
           />

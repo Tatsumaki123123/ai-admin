@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from './Sidebar';
 
 const { Header } = Layout;
 
@@ -68,7 +69,7 @@ export const Topbar: React.FC<TopbarProps> = ({ collapsed = false }) => {
         alignItems: 'center',
         zIndex: 999,
         height: '64px',
-        marginLeft: collapsed ? 80 : 200,
+        marginLeft: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
         transition: 'margin-left 0.2s',
       }}
     >

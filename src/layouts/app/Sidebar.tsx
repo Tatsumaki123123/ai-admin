@@ -18,6 +18,9 @@ import { RootState } from '../../redux/store';
 
 const { Sider } = Layout;
 
+export const SIDEBAR_WIDTH = 256;
+export const SIDEBAR_COLLAPSED_WIDTH = 80;
+
 interface SidebarProps {
   collapsed: boolean;
   onCollapse: (collapsed: boolean) => void;
@@ -92,8 +95,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
     <Sider
       trigger={null}
       collapsed={collapsed}
-      width={220}
-      collapsedWidth={60}
+      width={SIDEBAR_WIDTH}
+      collapsedWidth={SIDEBAR_COLLAPSED_WIDTH}
       style={{
         background: isDark ? '#141414' : '#fff',
         borderRight: `1px solid ${
@@ -104,12 +107,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
         top: 0,
         bottom: 0,
         zIndex: 99,
-        display: 'flex',
-        flexDirection: 'column',
       }}
     >
-      {/* Logo */}
-      <div
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {/* Logo */}
+        <div
         style={{
           height: '64px',
           display: 'flex',
@@ -154,7 +156,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
       </div>
 
       {/* Menu */}
-      <div style={{ flex: 1, overflow: 'hidden auto', padding: '8px 0' }}>
+      <div
+        style={{
+          flex: 1,
+          overflow: 'hidden auto',
+          padding: '8px 0 16px',
+        }}
+      >
         <ConfigProvider
           theme={{
             token: { colorPrimary: '#00c8a0' },
@@ -176,33 +184,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
         </ConfigProvider>
       </div>
 
-      {/* Bottom section */}
-      <div
-        style={{
-          borderTop: `1px solid ${
-            isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'
-          }`,
-          flexShrink: 0,
-        }}
-      >
+        {/* Bottom section */}
         <div
           style={{
-            height: '48px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: collapsed ? 'center' : 'space-between',
-            padding: collapsed ? '0 14px' : '0 20px',
-            cursor: 'pointer',
-            color: isDark ? '#888' : '#666',
+            marginTop: 'auto',
+            borderTop: `1px solid ${
+              isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'
+            }`,
+            flexShrink: 0,
+            background: isDark ? '#141414' : '#fff',
           }}
-          onClick={() => onCollapse(!collapsed)}
         >
-          {!collapsed && <span style={{ fontSize: '13px' }}>收起</span>}
-          {collapsed ? (
-            <MenuUnfoldOutlined style={{ fontSize: '16px' }} />
-          ) : (
-            <MenuFoldOutlined style={{ fontSize: '16px' }} />
-          )}
+          <div
+            style={{
+              height: '56px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: collapsed ? 'center' : 'space-between',
+              padding: collapsed ? '0 14px' : '0 20px',
+              cursor: 'pointer',
+              color: isDark ? '#888' : '#666',
+            }}
+            onClick={() => onCollapse(!collapsed)}
+          >
+            {!collapsed && <span style={{ fontSize: '13px' }}>收起</span>}
+            {collapsed ? (
+              <MenuUnfoldOutlined style={{ fontSize: '16px' }} />
+            ) : (
+              <MenuFoldOutlined style={{ fontSize: '16px' }} />
+            )}
+          </div>
         </div>
       </div>
     </Sider>
