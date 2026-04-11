@@ -4,6 +4,7 @@ import {
   ApiKeysPage,
   DeployPage,
   RedeemPage,
+  TopUpPage,
   SignInPage,
   SignUpPage,
 } from '../pages';
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: 'redeem',
         element: <RedeemPage />,
+      },
+      {
+        path: 'purchase',
+        element: <TopUpPage />,
       },
     ],
   },

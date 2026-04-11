@@ -103,10 +103,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
       label: '账单',
       children: [
         {
-          key: '/topup',
+          key: '/purchase',
           icon: <CreditCardOutlined />,
           label: '充值 / 订阅',
-          disabled: true,
+          onClick: () => navigate('/purchase'),
         },
         {
           key: '/orders',
