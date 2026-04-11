@@ -2,12 +2,16 @@ import { ConfigProvider, Menu, MenuProps } from 'antd';
 import {
   DashboardOutlined,
   KeyOutlined,
-  UserOutlined,
-  RocketOutlined,
-  BarChartOutlined,
-  StarOutlined,
+  ThunderboltOutlined,
   CreditCardOutlined,
+  ShoppingCartOutlined,
+  WalletOutlined,
+  CalendarOutlined,
   GiftOutlined,
+  TeamOutlined,
+  DollarOutlined,
+  SettingOutlined,
+  BarChartOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
@@ -32,6 +36,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
   const isDark = mytheme === 'dark';
   const normalizedPathname = location.pathname;
 
+  const findSelectedKey = (items: MenuProps['items']): string | undefined => {
+    for (const item of items || []) {
+      if (!item || typeof item !== 'object') {
+        continue;
+      }
+
+      if ('children' in item && Array.isArray(item.children)) {
+        const childMatch = findSelectedKey(item.children);
+        if (childMatch) {
+          return childMatch;
+        }
+      }
+
+      if (
+        'key' in item &&
+        typeof item.key === 'string' &&
+        normalizedPathname.startsWith(item.key)
+      ) {
+        return item.key;
+      }
+    }
+
+    return undefined;
+  };
+
   const menuItems: MenuProps['items'] = [
     {
       key: '/dashboard',
@@ -40,56 +69,92 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
       onClick: () => navigate('/dashboard'),
     },
     {
-      key: '/keys',
-      icon: <KeyOutlined />,
-      label: 'API 密钥',
-      onClick: () => navigate('/keys'),
+      type: 'group',
+      label: 'API',
+      children: [
+        {
+          key: '/keys',
+          icon: <KeyOutlined />,
+          label: 'API 密钥',
+          onClick: () => navigate('/keys'),
+        },
+        {
+          key: '/key-test',
+          icon: <ThunderboltOutlined />,
+          label: 'Key 测试',
+          disabled: true,
+        },
+        {
+          key: '/logs',
+          icon: <BarChartOutlined />,
+          label: '使用记录',
+          disabled: true,
+        },
+        {
+          key: '/deploy',
+          icon: <ThunderboltOutlined />,
+          label: '一键部署',
+          onClick: () => navigate('/deploy'),
+        },
+      ],
     },
     {
-      key: '/deploy',
-      icon: <RocketOutlined />,
-      label: '一键部署',
-      onClick: () => navigate('/deploy'),
+      type: 'group',
+      label: '账单',
+      children: [
+        {
+          key: '/topup',
+          icon: <CreditCardOutlined />,
+          label: '充值 / 订阅',
+          disabled: true,
+        },
+        {
+          key: '/orders',
+          icon: <ShoppingCartOutlined />,
+          label: '我的订单',
+          disabled: true,
+        },
+        {
+          key: '/quota-records',
+          icon: <WalletOutlined />,
+          label: '额度记录',
+          disabled: true,
+        },
+        {
+          key: '/subscription',
+          icon: <CalendarOutlined />,
+          label: '我的订阅',
+          disabled: true,
+        },
+        {
+          key: '/redeem',
+          icon: <GiftOutlined />,
+          label: '兑换码',
+          onClick: () => navigate('/redeem'),
+        },
+      ],
     },
     {
-      key: '/logs',
-      icon: <BarChartOutlined />,
-      label: '使用记录',
-      onClick: () => navigate('/logs'),
-    },
-    {
-      key: '/subscription',
-      icon: <StarOutlined />,
-      label: '我的订阅',
-      onClick: () => navigate('/subscription'),
-    },
-    {
-      key: '/topup',
-      icon: <CreditCardOutlined />,
-      label: '充值/订阅',
-      onClick: () => navigate('/topup'),
-    },
-    {
-      key: '/redeem',
-      icon: <GiftOutlined />,
-      label: '兑换',
-      onClick: () => navigate('/redeem'),
-    },
-    {
-      key: '/user-profile',
-      icon: <UserOutlined />,
-      label: '个人资料',
-      onClick: () => navigate('/user-profile/details'),
+      type: 'group',
+      label: '分销',
+      children: [
+        {
+          key: '/distribution',
+          icon: <TeamOutlined />,
+          label: '分销中心',
+          disabled: true,
+        },
+        {
+          key: '/commissions',
+          icon: <DollarOutlined />,
+          label: '佣金明细',
+          disabled: true,
+        },
+      ],
     },
   ];
 
-  const selectedKey =
-    menuItems
-      ?.filter(
-        (item: any) =>
-          item?.key && normalizedPathname.startsWith(item.key as string)
-      )
-      .map((item: any) => item?.key as string)[0] || '/dashboard';
+  const selectedKey = findSelectedKey(menuItems) || '/dashboard';
 
   return (
     <div
@@ -194,6 +259,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
             background: isDark ? '#141414' : '#fff',
           }}
         >
+          <div
+            style={{
+              height: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: collapsed ? '0 28px' : '0 20px',
+              color: isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.88)',
+              cursor: 'not-allowed',
+            }}
+          >
+            <SettingOutlined style={{ fontSize: '16px' }} />
+            {!collapsed && <span style={{ fontSize: '14px' }}>个人设置</span>}
+          </div>
           <div
             style={{
               height: '56px',
