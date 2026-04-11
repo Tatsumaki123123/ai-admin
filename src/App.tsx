@@ -28,38 +28,121 @@ export const COLOR = {
 function App() {
   const { mytheme } = useSelector((state: RootState) => state.theme);
 
+  const isDark = mytheme === 'dark';
+
   return (
     <HelmetProvider>
       <ConfigProvider
         theme={{
           token: {
             colorPrimary: PRIMARY_COLOR,
+            // ── 圆角 ──────────────────────────────────────────────
             borderRadius: 6,
-            fontFamily: 'Lato, sans-serif',
+            borderRadiusSM: 4,
+            borderRadiusLG: 8,
+            borderRadiusXS: 2,
+            // ── 字体 ──────────────────────────────────────────────
+            fontFamily:
+              "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            fontSize: 14,
+            // ── 间距 ──────────────────────────────────────────────
+            lineHeight: 1.6,
+            // ── 颜色 ──────────────────────────────────────────────
+            colorBorder: isDark ? 'rgba(255,255,255,0.12)' : '#e5e7eb',
+            colorBorderSecondary: isDark ? 'rgba(255,255,255,0.07)' : '#f0f0f0',
+            colorBgContainer: isDark ? '#141414' : '#ffffff',
+            colorBgElevated: isDark ? '#1e1e1e' : '#ffffff',
           },
           components: {
+            // ── Button ────────────────────────────────────────────
+            Button: {
+              fontWeight: 500,
+              primaryShadow: 'none',
+              defaultShadow: 'none',
+              dangerShadow: 'none',
+              controlHeight: 34,
+              controlHeightLG: 40,
+              controlHeightSM: 28,
+              paddingContentHorizontal: 16,
+            },
+            // ── Input ─────────────────────────────────────────────
+            Input: {
+              controlHeight: 34,
+              controlHeightLG: 40,
+              controlHeightSM: 28,
+              paddingBlock: 5,
+              activeShadow: `0 0 0 2px ${PRIMARY_COLOR}33`,
+            },
+            Select: {
+              controlHeight: 34,
+              controlHeightLG: 40,
+              controlHeightSM: 28,
+            },
+            // ── Card ──────────────────────────────────────────────
+            Card: {
+              paddingLG: 20,
+              colorBorderSecondary: isDark
+                ? 'rgba(255,255,255,0.08)'
+                : '#e5e7eb',
+            },
+            // ── Tag ───────────────────────────────────────────────
+            Tag: {
+              defaultBg: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+              borderRadiusSM: 20,
+              lineHeight: 1.8,
+            },
+            // ── Table ─────────────────────────────────────────────
+            Table: {
+              colorBgContainer: isDark ? '#141414' : '#ffffff',
+              headerBg: isDark ? '#141414' : '#ffffff',
+              rowHoverBg: isDark ? '#1f1f1f' : '#fafafa',
+              borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#f0f0f0',
+              headerSplitColor: 'transparent',
+              cellPaddingBlock: 12,
+              cellPaddingInline: 16,
+            },
+            // ── Dropdown ──────────────────────────────────────────
+            Dropdown: {
+              borderRadiusLG: 8,
+              paddingBlock: 5,
+            },
+            // ── Modal  ────────────────────────────────────────────
+            Modal: {
+              borderRadiusLG: 10,
+            },
+            // ── Popover ───────────────────────────────────────────
+            Popover: {
+              borderRadiusLG: 8,
+            },
+            // ── Divider ───────────────────────────────────────────
+            Divider: {
+              colorSplit: isDark ? 'rgba(255,255,255,0.07)' : '#f0f0f0',
+            },
+            // ── Badge ─────────────────────────────────────────────
+            Badge: {
+              fontSizeSM: 11,
+            },
+            // ── Calendar ──────────────────────────────────────────
             Calendar: {
               colorBgContainer: 'none',
             },
+            // ── Carousel ──────────────────────────────────────────
             Carousel: {
               dotWidth: 8,
             },
-            Table: {
-              colorBgContainer: mytheme === 'dark' ? '#141414' : '#ffffff',
-              headerBg: mytheme === 'dark' ? '#141414' : '#ffffff',
-              rowHoverBg: mytheme === 'dark' ? '#1f1f1f' : '#f5f5f5',
-            },
+            // ── Timeline ──────────────────────────────────────────
             Timeline: {
               dotBg: 'none',
             },
+            // ── Typography ────────────────────────────────────────
             Typography: {
               linkHoverDecoration: 'underline',
+              fontWeightStrong: 600,
             },
           },
-          algorithm:
-            mytheme === 'dark'
-              ? antdTheme.darkAlgorithm
-              : antdTheme.defaultAlgorithm,
+          algorithm: isDark
+            ? antdTheme.darkAlgorithm
+            : antdTheme.defaultAlgorithm,
         }}
       >
         <StylesContext.Provider

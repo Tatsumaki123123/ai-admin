@@ -206,9 +206,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
             <span
               style={{
                 marginLeft: '10px',
-                fontSize: '16px',
-                fontWeight: '600',
-                color: isDark ? '#fff' : '#1a1a1a',
+                fontSize: '15px',
+                fontWeight: 600,
+                letterSpacing: '-0.01em',
+                color: isDark ? '#fff' : '#0f172a',
                 whiteSpace: 'nowrap',
               }}
             >
@@ -231,8 +232,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
               token: { colorPrimary: PRIMARY_COLOR },
               components: {
                 Menu: {
-                  itemSelectedBg: hexToRgba(PRIMARY_COLOR, 0.12),
+                  itemSelectedBg: hexToRgba(PRIMARY_COLOR, 0.16),
                   itemSelectedColor: PRIMARY_COLOR,
+                  itemHoverBg: isDark
+                    ? 'rgba(255,255,255,0.05)'
+                    : 'rgba(0,0,0,0.04)',
+                  itemBorderRadius: 6,
+                  itemMarginInline: 6,
+                  itemPaddingInline: 10,
+                  groupTitleColor: isDark
+                    ? 'rgba(255,255,255,0.3)'
+                    : 'rgba(0,0,0,0.3)',
+                  groupTitleFontSize: 11,
                 },
               },
             }}

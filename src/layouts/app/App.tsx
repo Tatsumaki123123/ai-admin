@@ -227,9 +227,10 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               <Typography.Text
                 strong
                 style={{
-                  fontSize: isMobile ? '18px' : '22px',
+                  fontSize: isMobile ? '18px' : '20px',
                   lineHeight: 1.2,
-                  color: mytheme === 'dark' ? '#fff' : '#000',
+                  letterSpacing: '-0.02em',
+                  color: mytheme === 'dark' ? '#f1f5f9' : '#0f172a',
                 }}
               >
                 {pageHeader.title ?? ''}
@@ -238,7 +239,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
                 <Typography.Text
                   style={{
                     fontSize: '13px',
-                    color: mytheme === 'dark' ? '#8c8c8c' : '#666',
+                    color:
+                      mytheme === 'dark' ? 'rgba(255,255,255,0.4)' : '#94a3b8',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
