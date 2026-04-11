@@ -9,6 +9,8 @@ import {
   QuotaRecordsPage,
   SubscriptionPage,
   DistributionPage,
+  CommissionsPage,
+  SettingsPage,
   SignInPage,
   SignUpPage,
 } from '../pages';
@@ -64,8 +66,17 @@ const router = createBrowserRouter([
         path: 'distribution',
         element: <DistributionPage />,
       },
+      {
+        path: 'commissions',
+        element: <CommissionsPage />,
+      },
+      {
+        path: 'settings',
+        element: <SettingsPage />,
+      },
     ],
   },
+  ,
   {
     path: '/auth/signin',
     element: (

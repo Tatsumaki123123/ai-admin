@@ -148,7 +148,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
           key: '/commissions',
           icon: <DollarOutlined />,
           label: '佣金明细',
-          disabled: true,
+          onClick: () => navigate('/commissions'),
         },
       ],
     },
@@ -278,8 +278,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
               gap: '12px',
               padding: collapsed ? '0 28px' : '0 20px',
               color: isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.88)',
-              cursor: 'not-allowed',
+              cursor: 'pointer',
+              borderRadius: 6,
+              margin: '0 6px',
             }}
+            onClick={() => navigate('/settings')}
           >
             <SettingOutlined style={{ fontSize: '16px' }} />
             {!collapsed && <span style={{ fontSize: '14px' }}>个人设置</span>}

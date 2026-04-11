@@ -78,6 +78,9 @@ const ENDPOINT_MOCK_MAP: Record<string, string> = {
   // Quota Records
   '/user/quota/records': '/mocks/QuotaRecords.json',
 
+  // Commissions
+  '/user/commissions': '/mocks/Commissions.json',
+
   // Corporate Pages
   '/antd/employees': '/mocks/Employees.json',
   '/antd/faqs': '/mocks/Faqs.json',
