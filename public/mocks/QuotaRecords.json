@@ -1,0 +1,42 @@
+{
+  "success": true,
+  "data": {
+    "summary": {
+      "total_recharge": 0,
+      "recharge_count": 0,
+      "redeem_count": 0,
+      "total_consumption": 0.00004,
+      "net_quota": -0.00004
+    },
+    "records": [
+      {
+        "id": "1",
+        "type": "consumption",
+        "detail": "1 次请求 · 128 tok",
+        "amount": -0.00004,
+        "created_time": 1744336800
+      },
+      {
+        "id": "2",
+        "type": "recharge",
+        "detail": "充值 入门版 ¥199",
+        "amount": 0.9,
+        "created_time": 1744250400
+      },
+      {
+        "id": "3",
+        "type": "redeem",
+        "detail": "兑换码 GIFT-2026",
+        "amount": 0.1,
+        "created_time": 1744164000
+      },
+      {
+        "id": "4",
+        "type": "consumption",
+        "detail": "5 次请求 · 2048 tok",
+        "amount": -0.0012,
+        "created_time": 1744077600
+      }
+    ]
+  }
+}

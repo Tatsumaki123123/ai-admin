@@ -5,6 +5,10 @@ import {
   DeployPage,
   RedeemPage,
   TopUpPage,
+  OrdersPage,
+  QuotaRecordsPage,
+  SubscriptionPage,
+  DistributionPage,
   SignInPage,
   SignUpPage,
 } from '../pages';
@@ -43,6 +47,22 @@ const router = createBrowserRouter([
       {
         path: 'purchase',
         element: <TopUpPage />,
+      },
+      {
+        path: 'orders',
+        element: <OrdersPage />,
+      },
+      {
+        path: 'quota-records',
+        element: <QuotaRecordsPage />,
+      },
+      {
+        path: 'subscription',
+        element: <SubscriptionPage />,
+      },
+      {
+        path: 'distribution',
+        element: <DistributionPage />,
       },
     ],
   },

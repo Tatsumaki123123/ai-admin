@@ -112,19 +112,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
           key: '/orders',
           icon: <ShoppingCartOutlined />,
           label: '我的订单',
-          disabled: true,
+          onClick: () => navigate('/orders'),
         },
         {
           key: '/quota-records',
           icon: <WalletOutlined />,
           label: '额度记录',
-          disabled: true,
+          onClick: () => navigate('/quota-records'),
         },
         {
           key: '/subscription',
           icon: <CalendarOutlined />,
           label: '我的订阅',
-          disabled: true,
+          onClick: () => navigate('/subscription'),
         },
         {
           key: '/redeem',
@@ -142,7 +142,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
           key: '/distribution',
           icon: <TeamOutlined />,
           label: '分销中心',
-          disabled: true,
+          onClick: () => navigate('/distribution'),
         },
         {
           key: '/commissions',
