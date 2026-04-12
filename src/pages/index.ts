@@ -9,5 +9,6 @@ export { SubscriptionPage } from './Subscription';
 export { DistributionPage } from './Distribution';
 export { CommissionsPage } from './Commissions';
 export { SettingsPage } from './Settings';
+export { LogsPage } from './Logs';
 export { SignInPage } from './authentication/SignIn.tsx';
 export { SignUpPage } from './authentication/SignUp.tsx';

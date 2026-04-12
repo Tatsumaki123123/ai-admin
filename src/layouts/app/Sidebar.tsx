@@ -88,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onCollapse }) => {
           key: '/logs',
           icon: <BarChartOutlined />,
           label: '使用记录',
-          disabled: true,
+          onClick: () => navigate('/logs'),
         },
         {
           key: '/deploy',

@@ -11,6 +11,7 @@ import {
   DistributionPage,
   CommissionsPage,
   SettingsPage,
+  LogsPage,
   SignInPage,
   SignUpPage,
 } from '../pages';
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
       {
         path: 'settings',
         element: <SettingsPage />,
+      },
+      {
+        path: 'logs',
+        element: <LogsPage />,
       },
     ],
   },
