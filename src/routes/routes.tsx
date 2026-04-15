@@ -12,6 +12,8 @@ import {
   CommissionsPage,
   SettingsPage,
   LogsPage,
+  LandingPage,
+  PricingPage,
   SignInPage,
   SignUpPage,
 } from '../pages';
@@ -21,7 +23,15 @@ import { ProtectedRoute } from '../utils/ProtectedRoute';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/dashboard" replace />,
+    element: <LandingPage />,
+  },
+  {
+    path: '/home',
+    element: <LandingPage />,
+  },
+  {
+    path: '/pricing',
+    element: <PricingPage />,
   },
   {
     path: '/',
