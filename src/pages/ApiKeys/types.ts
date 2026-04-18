@@ -19,9 +19,10 @@ export interface ApiKeyItem {
 }
 
 export interface ApiResponse {
-  data: { page: number; page_size: number; total: number; items: ApiKeyItem[] };
-  message: string;
-  success: boolean;
+  page: number;
+  page_size: number;
+  total: number;
+  items: ApiKeyItem[];
 }
 
 export interface GroupInfo {

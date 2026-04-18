@@ -74,7 +74,7 @@ export function UseKeyModal({
 
   if (!record) return null;
 
-  const key = record.key;
+  const key = record.key.startsWith('sk-') ? record.key : `sk-${record.key}`;
   const base = apiBase;
 
   const claudeTerminal: Record<string, string> = {

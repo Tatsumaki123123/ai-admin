@@ -46,11 +46,10 @@ export const SettingsPage = () => {
   useEffect(() => {
     apiClient
       .get('/user/self')
-      .then((res) => {
-        if (res.data?.success && res.data.data) {
-          const d = res.data.data;
-          setEmail(d.email ?? user?.email ?? '');
-          setUsername(d.username ?? user?.userName ?? '');
+      .then((data) => {
+        if (data) {
+          setEmail(data.email ?? user?.email ?? '');
+          setUsername(data.username ?? user?.userName ?? '');
         }
       })
       .catch(() => {});
@@ -63,15 +62,13 @@ export const SettingsPage = () => {
     }
     setUpdatingUsername(true);
     try {
-      const res = await apiClient.put('/user/self', {
+      await apiClient.put('/user/self', {
         username: newUsername.trim(),
       });
-      if (res.data?.success) {
-        message.success('用户名已更新');
-        setUsername(newUsername.trim());
-        dispatch(setUser({ ...user!, userName: newUsername.trim() }));
-        setNewUsername('');
-      }
+      message.success('用户名已更新');
+      setUsername(newUsername.trim());
+      dispatch(setUser({ ...user!, userName: newUsername.trim() }));
+      setNewUsername('');
     } catch {
       /* global interceptor handles */
     } finally {
@@ -90,15 +87,13 @@ export const SettingsPage = () => {
     }
     setUpdatingPwd(true);
     try {
-      const res = await apiClient.put('/user/password', {
+      await apiClient.put('/user/password', {
         old_password: currentPwd,
         new_password: newPwd,
       });
-      if (res.data?.success) {
-        message.success('密码已修改');
-        setCurrentPwd('');
-        setNewPwd('');
-      }
+      message.success('密码已修改');
+      setCurrentPwd('');
+      setNewPwd('');
     } catch {
       /* global interceptor handles */
     } finally {

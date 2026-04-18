@@ -26,8 +26,7 @@ interface ApiKeyItem {
 }
 
 interface ApiResponse {
-  data: { items: ApiKeyItem[] };
-  success: boolean;
+  items: ApiKeyItem[];
 }
 
 const API_BASE = (
@@ -107,14 +106,12 @@ export const DeployPage = () => {
 
   const fetchKeys = useCallback(async () => {
     try {
-      const res = await apiClient.get<ApiResponse>('/token/', {
+      const data = await apiClient.get<ApiResponse>('/token/', {
         params: { p: 1, size: 100 },
       });
-      if (res.data.success) {
-        const items = res.data.data.items || [];
-        setKeys(items);
-        if (items.length > 0) setSelected(items[0]);
-      }
+      const items = data?.items || [];
+      setKeys(items);
+      if (items.length > 0) setSelected(items[0]);
     } catch {
       /* ignore */
     }

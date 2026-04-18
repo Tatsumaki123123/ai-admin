@@ -107,10 +107,10 @@ export const CommissionsPage = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/user/commissions');
-      if (res.data?.success && res.data.data) {
-        setSummary({ ...MOCK_SUMMARY, ...res.data.data.summary });
-        setRecords(res.data.data.records ?? []);
+      const data = await apiClient.get('/user/commissions');
+      if (data) {
+        setSummary({ ...MOCK_SUMMARY, ...data.summary });
+        setRecords(data.records ?? []);
       }
     } catch {
       /* ignore */

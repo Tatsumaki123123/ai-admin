@@ -97,10 +97,10 @@ export const QuotaRecordsPage = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/user/quota/records');
-      if (res.data?.success && res.data.data) {
-        setSummary(res.data.data.summary);
-        setRecords(res.data.data.records);
+      const data = await apiClient.get('/user/quota/records');
+      if (data) {
+        setSummary(data.summary);
+        setRecords(data.records);
       }
     } catch {
       /* global interceptor handles */

@@ -55,8 +55,8 @@ export const RedeemPage = () => {
   const fetchUserInfo = useCallback(async () => {
     setLoadingUser(true);
     try {
-      const res = await apiClient.get('/user/self');
-      if (res.data.success) setUserInfo(res.data.data);
+      const userInfo = await apiClient.get('/user/self');
+      setUserInfo(userInfo);
     } catch {
       /* ignore */
     } finally {
@@ -76,20 +76,18 @@ export const RedeemPage = () => {
     setSubmitting(true);
     try {
       const res = await apiClient.post('/user/redeem', { key: code.trim() });
-      if (res.data.success) {
-        message.success('兑换成功！');
-        setCode('');
-        fetchUserInfo();
-        setRecords((prev) => [
-          {
-            id: Date.now(),
-            name: code.trim(),
-            quota: res.data.data?.quota || 0,
-            created_time: Math.floor(Date.now() / 1000),
-          },
-          ...prev,
-        ]);
-      }
+      message.success('兑换成功！');
+      setCode('');
+      fetchUserInfo();
+      setRecords((prev) => [
+        {
+          id: Date.now(),
+          name: code.trim(),
+          quota: res?.quota || 0,
+          created_time: Math.floor(Date.now() / 1000),
+        },
+        ...prev,
+      ]);
     } catch {
       /* global interceptor handles */
     } finally {

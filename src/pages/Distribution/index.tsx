@@ -107,9 +107,9 @@ export const DistributionPage = () => {
   const fetchAffInfo = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/user/aff');
-      if (res.data?.success && res.data.data) {
-        setAffInfo({ ...MOCK_AFF_INFO, ...res.data.data });
+      const data = await apiClient.get('/user/aff');
+      if (data) {
+        setAffInfo({ ...MOCK_AFF_INFO, ...data });
       }
     } catch {
       setAffInfo(MOCK_AFF_INFO);

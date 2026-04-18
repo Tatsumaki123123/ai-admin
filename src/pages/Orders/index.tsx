@@ -75,9 +75,9 @@ export const OrdersPage = () => {
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/order/list');
-      if (res.data?.success && Array.isArray(res.data.data)) {
-        setOrders(res.data.data);
+      const data = await apiClient.get('/order/list');
+      if (Array.isArray(data)) {
+        setOrders(data);
       }
     } catch {
       /* global interceptor handles */

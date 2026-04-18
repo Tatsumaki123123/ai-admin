@@ -28,12 +28,12 @@ export function CCSwitchModal({
   const handleOpen = async () => {
     try {
       const values = await form.validateFields();
-      const key = record!.key;
+      const key = record!.key.startsWith('sk-') ? record!.key : `sk-${record!.key}`;
       const endpoint = ccApp === 'codex' ? `${apiBase}/v1` : apiBase;
       const params = new URLSearchParams();
       params.set('resource', 'provider');
       params.set('app', ccApp);
-      params.set('name', values.name || 'My Claude');
+      params.set('name', values.name || 'ApeCode');
       params.set('endpoint', endpoint);
       params.set('apiKey', key);
       const mainModel =
@@ -89,7 +89,7 @@ export function CCSwitchModal({
         if (open) {
           setCCApp('claude');
           form.resetFields();
-          form.setFieldsValue({ name: record.name || 'My Claude' });
+          form.setFieldsValue({ name: record.name || 'ApeCode' });
         }
       }}
     >

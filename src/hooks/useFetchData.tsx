@@ -17,23 +17,12 @@ const useFetchData = <T = any,>(url: string) => {
       console.log('[useFetchData] Fetching URL:', url, 'Mock mode:', useMockData);
 
       // Use apiClient instead of fetch - this will go through our interceptor
-      const response = await apiClient.get(url);
-      const json = response.data;
+      const data = await apiClient.get(url);
 
-      console.log('[useFetchData] Response received:', json);
+      console.log('[useFetchData] Response received:', data);
 
-      // Check if the response has a nested 'data' property (API format)
-      // Otherwise, use the response as-is (direct array format from mocks)
-      if (
-        json &&
-        typeof json === 'object' &&
-        'data' in json &&
-        !Array.isArray(json)
-      ) {
-        setData(json.data);
-      } else {
-        setData(json);
-      }
+      // apiClient now resolves directly to data (no .data wrapper needed)
+      setData(data);
       setError(null);
     } catch (error) {
       console.error('[useFetchData] Error:', error);

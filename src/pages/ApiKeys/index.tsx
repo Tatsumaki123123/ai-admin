@@ -1,6 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Card, Button, Input, Space, Flex, Tooltip, message } from 'antd';
-import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import {
+  Button,
+  Input,
+  Select,
+  Space,
+  Flex,
+  Tooltip,
+  message,
+  Typography,
+  Badge,
+} from 'antd';
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  CopyOutlined,
+} from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import type { TablePaginationConfig } from 'antd/es/table';
@@ -17,19 +31,92 @@ import { KeyFormModal } from './components/KeyFormModal';
 import { UseKeyModal } from './components/UseKeyModal';
 import { CCSwitchModal } from './components/CCSwitchModal';
 
+const { Text } = Typography;
+
+// ── Endpoint banner ───────────────────────────────────────────────────────────
+function EndpointRow({
+  label,
+  url,
+  isDark,
+}: {
+  label: string;
+  url: string;
+  isDark: boolean;
+}) {
+  const codeBg = isDark ? 'rgba(255,255,255,0.06)' : '#f0f4ff';
+  const codeBorder = isDark ? 'rgba(22,119,255,0.2)' : 'rgba(22,119,255,0.15)';
+  return (
+    <Flex align="center" gap={10}>
+      <Text
+        style={{
+          color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)',
+          fontSize: 12,
+          minWidth: 90,
+          textAlign: 'right',
+        }}
+      >
+        {label}
+      </Text>
+      <Flex
+        align="center"
+        gap={6}
+        style={{
+          background: codeBg,
+          border: `1px solid ${codeBorder}`,
+          borderRadius: 6,
+          padding: '4px 10px',
+          flex: 1,
+          maxWidth: 420,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: 'monospace',
+            fontSize: 13,
+            flex: 1,
+            color: '#1677ff',
+            letterSpacing: 0.2,
+          }}
+        >
+          {url}
+        </Text>
+        <Tooltip title="复制">
+          <Button
+            type="text"
+            size="small"
+            icon={<CopyOutlined style={{ fontSize: 12 }} />}
+            style={{ color: 'rgba(22,119,255,0.6)', padding: '0 4px', height: 20 }}
+            onClick={() =>
+              navigator.clipboard.writeText(url).then(() => message.success('已复制'))
+            }
+          />
+        </Tooltip>
+      </Flex>
+    </Flex>
+  );
+}
+
 export const ApiKeysPage = () => {
   const { t } = useTranslation();
   usePageHeader({
     title: t('apiKeys.title'),
-    description: t('apiKeys.subtitle'),
+    description: '平台 Key 现在会安全保存，后续可随时回来复制使用，不再是一次性展示。',
   });
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const isDark = mytheme === 'dark';
+
+  const borderColor = isDark ? 'rgba(255,255,255,0.08)' : '#e8edf5';
+  const cardBg = isDark ? '#141414' : '#fff';
+  const bannerBg = isDark
+    ? 'linear-gradient(135deg, rgba(22,119,255,0.08) 0%, rgba(114,46,209,0.06) 100%)'
+    : 'linear-gradient(135deg, #f0f6ff 0%, #f5f0ff 100%)';
 
   // ── table state ──────────────────────────────────────
   const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState('');
+  const [filterGroup, setFilterGroup] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<string>('');
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: 10,
@@ -39,49 +126,54 @@ export const ApiKeysPage = () => {
   const [groups, setGroups] = useState<Record<string, GroupInfo>>({});
   const [models, setModels] = useState<string[]>([]);
 
-  // ── form modal state ──────────────────────────────────
+  // ── modal state ───────────────────────────────────────
   const [formVisible, setFormVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ApiKeyItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  // ── use-key modal state ───────────────────────────────
   const [useKeyRecord, setUseKeyRecord] = useState<ApiKeyItem | null>(null);
   const [useKeyVisible, setUseKeyVisible] = useState(false);
-
-  // ── cc-switch modal state ─────────────────────────────
   const [cssRecord, setCssRecord] = useState<ApiKeyItem | null>(null);
   const [cssVisible, setCssVisible] = useState(false);
 
   // ── data fetching ─────────────────────────────────────
-  const fetchApiKeys = useCallback(async (page = 1, size = 10, kw = '') => {
-    setLoading(true);
-    try {
-      const url = kw.trim() ? '/token/search' : '/token/';
+  const fetchApiKeys = useCallback(
+    async (
+      page = 1,
+      size = 10,
+      kw = '',
+      group = filterGroup,
+      status = filterStatus,
+    ) => {
+      setLoading(true);
+      try {
+        const url = kw.trim() ? '/token/search' : '/token/';
+        const params: Record<string, any> = kw.trim()
+          ? { keyword: `%${kw.trim()}%`, p: page, size, show_key: true }
+          : { p: page, size, show_key: true };
+        if (group) params.group = group;
+        if (status !== '') params.status = status;
 
-      const params = kw.trim()
-        ? { keyword: `%${kw.trim()}%`, p: page, size, show_key: true }
-        : { p: page, size, show_key: true };
-      const res = await apiClient.get<ApiResponse>(url, { params });
-      if (res.data.success) {
-        setApiKeys(res.data.data.items);
+        const data = await apiClient.get<ApiResponse>(url, { params });
+        setApiKeys(data.items);
         setPagination((p) => ({
           ...p,
-          current: res.data.data.page,
-          pageSize: res.data.data.page_size,
-          total: res.data.data.total,
+          current: data.page,
+          pageSize: data.page_size,
+          total: data.total,
         }));
+      } catch {
+        /* ignore */
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      /* ignore */
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [filterGroup, filterStatus],
+  );
 
   const fetchGroups = useCallback(async () => {
     try {
-      const res = await apiClient.get('/user/self/groups');
-      if (res.data.success) setGroups(res.data.data || {});
+      const data = await apiClient.get('/user/self/groups');
+      setGroups(data || {});
     } catch {
       /* ignore */
     }
@@ -89,8 +181,7 @@ export const ApiKeysPage = () => {
 
   const fetchModels = useCallback(async () => {
     try {
-      const res = await apiClient.get('/user/models');
-      const data: string[] = res.data?.data || [];
+      const data: string[] = await apiClient.get('/user/models') || [];
       setModels(data.filter(Boolean));
     } catch {
       /* ignore */
@@ -118,16 +209,12 @@ export const ApiKeysPage = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const res = await apiClient.delete(`/token/${id}`);
-      if (res.data.success === false) {
-        message.error(res.data.message || t('apiKeys.deleteFailed'));
-        return;
-      }
+      await apiClient.delete(`/token/${id}`);
       message.success(t('apiKeys.deleteSuccess'));
       fetchApiKeys(
         pagination.current as number,
         pagination.pageSize as number,
-        keyword
+        keyword,
       );
     } catch {
       message.error(t('apiKeys.deleteFailed'));
@@ -153,11 +240,7 @@ export const ApiKeysPage = () => {
       };
 
       if (editing) {
-        const res = await apiClient.put(`/token/${editing.id}`, payload);
-        if (res.data.success === false) {
-          message.error(res.data.message || t('apiKeys.updateFailed'));
-          return;
-        }
+        await apiClient.put(`/token/${editing.id}`, payload);
         message.success(t('apiKeys.updateSuccess'));
       } else {
         const count = values.count || 1;
@@ -166,11 +249,7 @@ export const ApiKeysPage = () => {
             count > 1
               ? `${values.name}_${Math.random().toString(36).slice(2, 6)}`
               : values.name;
-          const res = await apiClient.post('/token/', { ...payload, name });
-          if (res.data.success === false) {
-            message.error(res.data.message || t('apiKeys.createFailed'));
-            return;
-          }
+          await apiClient.post('/token/', { ...payload, name });
         }
         message.success(t('apiKeys.createSuccess'));
       }
@@ -179,36 +258,121 @@ export const ApiKeysPage = () => {
       fetchApiKeys(
         editing ? (pagination.current as number) : 1,
         pagination.pageSize as number,
-        keyword
+        keyword,
       );
     } finally {
       setSubmitting(false);
     }
   };
 
+  const groupOptions = [
+    { label: t('apiKeys.allGroups'), value: '' },
+    ...Object.entries(groups).map(([k, v]) => ({
+      label: v.desc ? `${k} · ${v.desc}` : k,
+      value: k,
+    })),
+  ];
+
+  const statusOptions = [
+    { label: t('apiKeys.allStatus'), value: '' },
+    { label: t('apiKeys.active'), value: '1' },
+    { label: t('apiKeys.inactive'), value: '2' },
+  ];
+
+  const openaiEndpoint = `${API_BASE}/v1`;
+  const anthropicEndpoint = API_BASE;
+
   return (
-    <>
-      <Card>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+      {/* ── Endpoint banner ─────────────────────────────────────────────────── */}
+      <div
+        style={{
+          background: bannerBg,
+          border: `1px solid ${borderColor}`,
+          borderRadius: 12,
+          padding: '16px 24px',
+        }}
+      >
+        <Flex align="center" gap={8} style={{ marginBottom: 12 }}>
+          <Badge status="processing" />
+          <Text strong style={{ fontSize: 13 }}>
+            推荐接入地址
+          </Text>
+        </Flex>
+        <Flex vertical gap={8}>
+          <EndpointRow label="OpenAI 兼容" url={openaiEndpoint} isDark={isDark} />
+          <EndpointRow label="Anthropic" url={anthropicEndpoint} isDark={isDark} />
+        </Flex>
+      </div>
+
+      {/* ── Main card ───────────────────────────────────────────────────────── */}
+      <div
+        style={{
+          background: cardBg,
+          border: `1px solid ${borderColor}`,
+          borderRadius: 12,
+          overflow: 'hidden',
+        }}
+      >
+        {/* toolbar */}
         <Flex
           justify="space-between"
           align="center"
-          style={{ marginBottom: 16 }}
+          wrap="wrap"
+          gap={10}
+          style={{ padding: '16px 20px', borderBottom: `1px solid ${borderColor}` }}
         >
-          <Input.Search
-            placeholder={t('apiKeys.searchPlaceholder')}
-            style={{ width: 280 }}
-            allowClear
-            value={keyword}
-            onChange={(e) => {
-              const v = e.target.value;
-              setKeyword(v);
-              if (!v.trim()) fetchApiKeys(1, pagination.pageSize as number, '');
-            }}
-            onSearch={(v) => {
-              setKeyword(v);
-              fetchApiKeys(1, pagination.pageSize as number, v);
-            }}
-          />
+          <Flex gap={8} wrap="wrap" align="center">
+            <Input.Search
+              placeholder={t('apiKeys.searchPlaceholder')}
+              style={{ width: 240 }}
+              allowClear
+              value={keyword}
+              onChange={(e) => {
+                const v = e.target.value;
+                setKeyword(v);
+                if (!v.trim())
+                  fetchApiKeys(1, pagination.pageSize as number, '');
+              }}
+              onSearch={(v) => {
+                setKeyword(v);
+                fetchApiKeys(1, pagination.pageSize as number, v);
+              }}
+            />
+            <Select
+              value={filterGroup}
+              onChange={(v) => {
+                setFilterGroup(v);
+                fetchApiKeys(
+                  1,
+                  pagination.pageSize as number,
+                  keyword,
+                  v,
+                  filterStatus,
+                );
+              }}
+              style={{ width: 160 }}
+              options={groupOptions}
+              placeholder="全部分组"
+            />
+            <Select
+              value={filterStatus}
+              onChange={(v) => {
+                setFilterStatus(v);
+                fetchApiKeys(
+                  1,
+                  pagination.pageSize as number,
+                  keyword,
+                  filterGroup,
+                  v,
+                );
+              }}
+              style={{ width: 110 }}
+              options={statusOptions}
+              placeholder="全部状态"
+            />
+          </Flex>
           <Space>
             <Tooltip title="刷新">
               <Button
@@ -218,7 +382,7 @@ export const ApiKeysPage = () => {
                   fetchApiKeys(
                     pagination.current as number,
                     pagination.pageSize as number,
-                    keyword
+                    keyword,
                   )
                 }
               />
@@ -236,11 +400,14 @@ export const ApiKeysPage = () => {
           </Space>
         </Flex>
 
+        {/* table */}
         <ApiKeyTable
           dataSource={apiKeys}
           loading={loading}
           pagination={pagination}
           visibleKeys={visibleKeys}
+          groups={groups}
+          isDark={isDark}
           onToggleVisibility={handleToggleVisibility}
           onCopyKey={handleCopyKey}
           onEdit={(r) => {
@@ -260,7 +427,7 @@ export const ApiKeysPage = () => {
             fetchApiKeys(pg.current || 1, pg.pageSize || 10, keyword)
           }
         />
-      </Card>
+      </div>
 
       <KeyFormModal
         visible={formVisible}
@@ -270,7 +437,6 @@ export const ApiKeysPage = () => {
         onOk={handleFormOk}
         onCancel={() => setFormVisible(false)}
       />
-
       <UseKeyModal
         visible={useKeyVisible}
         record={useKeyRecord}
@@ -278,7 +444,6 @@ export const ApiKeysPage = () => {
         isDark={isDark}
         onClose={() => setUseKeyVisible(false)}
       />
-
       <CCSwitchModal
         visible={cssVisible}
         record={cssRecord}
@@ -286,6 +451,6 @@ export const ApiKeysPage = () => {
         apiBase={API_BASE}
         onClose={() => setCssVisible(false)}
       />
-    </>
+    </div>
   );
 };

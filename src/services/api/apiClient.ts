@@ -150,7 +150,14 @@ apiClient.interceptors.request.use(
 
 /**
  * Response Interceptor
- * Handles responses and errors globally
+ * Handles responses and errors globally.
+ *
+ * For responses with the standard envelope { success, data, message }:
+ *   - success: false  → reject (message.error already shown)
+ *   - success: true   → unwrap: response.data is replaced with data.data
+ *
+ * For responses without the envelope (e.g. mock JSON files) the original
+ * response.data is left untouched.
  */
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
@@ -164,25 +171,24 @@ apiClient.interceptors.response.use(
       );
     }
 
-    // Check if the API response indicates an error (success: false)
     const responseData = response.data;
+
+    // Only process standard envelope responses
     if (
       responseData &&
       typeof responseData === 'object' &&
       'success' in responseData
     ) {
       if (responseData.success === false) {
-        // Create a custom error with the API message
         const error = new Error(
           responseData.message || 'Request failed'
         ) as AxiosError;
         (error as any).response = response;
-        (error as any).status = 200; // HTTP 200 but API says failed
+        (error as any).status = 200;
 
         if (import.meta.env.DEV) {
           console.error('[API Business Error]', {
             message: responseData.message,
-            success: responseData.success,
             url: response.config.url,
           });
         }
@@ -190,6 +196,9 @@ apiClient.interceptors.response.use(
         message.error(responseData.message || '请求失败');
         return Promise.reject(error);
       }
+
+      // Unwrap: replace response.data with the inner data payload
+      response.data = responseData.data;
     }
 
     return response;
@@ -338,4 +347,38 @@ export const apiRequest = {
 
 console.log('[API Client] apiRequest wrapper exported');
 
-export default apiClient;
+/**
+ * Wrapped apiClient — all methods resolve directly to the response data,
+ * so callers can write:
+ *   const data = await apiClient.get('/some/path')
+ * instead of:
+ *   const res = await apiClient.get('/some/path'); res.data
+ */
+
+type DataClient = {
+  get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  interceptors: AxiosInstance['interceptors'];
+  defaults: AxiosInstance['defaults'];
+};
+
+const wrappedClient = new Proxy(apiClient, {
+  get(target, prop) {
+    const method = (target as any)[prop];
+    if (
+      typeof method === 'function' &&
+      ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'].includes(
+        prop as string
+      )
+    ) {
+      return (...args: any[]) =>
+        (method as Function).apply(target, args).then((res: AxiosResponse) => res.data);
+    }
+    return typeof method === 'function' ? method.bind(target) : method;
+  },
+}) as unknown as DataClient;
+
+export default wrappedClient;
