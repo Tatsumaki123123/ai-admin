@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Typography, Collapse } from 'antd';
 import {
@@ -247,7 +246,6 @@ const PricingCard = ({
 /* ─── main component ───────────────────────────────────── */
 export const LandingPage = () => {
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const tools = [
     { name: 'Claude Code', desc: 'Anthropic 官方 CLI' },

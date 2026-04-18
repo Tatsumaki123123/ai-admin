@@ -32,7 +32,7 @@ import type { RootState } from '../../redux/store';
 import { PRIMARY_COLOR, hexToRgba } from '../../theme/colors';
 import { message } from 'antd';
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 const SUPPORTED_MODELS = [
   'Claude Opus 4.6',

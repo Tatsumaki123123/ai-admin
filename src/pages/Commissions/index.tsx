@@ -21,7 +21,7 @@ import { usePageHeader } from '../../hooks/usePageContext';
 import apiClient from '../../services/api/apiClient';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../redux/store';
-import { PRIMARY_COLOR, hexToRgba } from '../../theme/colors';
+import { PRIMARY_COLOR } from '../../theme/colors';
 import { useNavigate } from 'react-router-dom';
 
 const { Text, Title } = Typography;

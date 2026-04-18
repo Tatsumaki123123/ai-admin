@@ -5,7 +5,6 @@ import {
   DashboardOutlined,
   LogoutOutlined,
   DownOutlined,
-  RightOutlined,
 } from '@ant-design/icons';
 import logoImg from '../../assets/logo.png';
 import { useAuth } from '../../contexts/AuthContext';
