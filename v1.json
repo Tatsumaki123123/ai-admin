@@ -20,7 +20,7 @@
     }
   ],
   "paths": {
-    "/api/v1/mantine/chats": {
+    "/api/mantine/chats": {
       "get": {
         "tags": ["Mantine - Communication"],
         "parameters": [
@@ -89,7 +89,7 @@
         }
       }
     },
-    "/api/v1/mantine/chat-items": {
+    "/api/mantine/chat-items": {
       "get": {
         "tags": ["Mantine - Communication"],
         "parameters": [
@@ -172,7 +172,7 @@
         }
       }
     },
-    "/api/v1/mantine/chats/{id}": {
+    "/api/mantine/chats/{id}": {
       "get": {
         "tags": ["Mantine - Communication"],
         "parameters": [
@@ -257,7 +257,7 @@
         }
       }
     },
-    "/api/v1/mantine/chat-items/{id}": {
+    "/api/mantine/chat-items/{id}": {
       "get": {
         "tags": ["Mantine - Communication"],
         "parameters": [
@@ -301,7 +301,7 @@
         }
       }
     },
-    "/api/v1/mantine/files": {
+    "/api/mantine/files": {
       "get": {
         "tags": ["Mantine - File Management"],
         "parameters": [
@@ -384,7 +384,7 @@
         }
       }
     },
-    "/api/v1/mantine/folders": {
+    "/api/mantine/folders": {
       "get": {
         "tags": ["Mantine - File Management"],
         "parameters": [
@@ -460,7 +460,7 @@
         }
       }
     },
-    "/api/v1/mantine/file-activities": {
+    "/api/mantine/file-activities": {
       "get": {
         "tags": ["Mantine - File Management"],
         "parameters": [
@@ -493,7 +493,7 @@
         }
       }
     },
-    "/api/v1/mantine/files/{id}": {
+    "/api/mantine/files/{id}": {
       "get": {
         "tags": ["Mantine - File Management"],
         "parameters": [
@@ -578,7 +578,7 @@
         }
       }
     },
-    "/api/v1/mantine/folders/{id}": {
+    "/api/mantine/folders/{id}": {
       "get": {
         "tags": ["Mantine - File Management"],
         "parameters": [
@@ -663,7 +663,7 @@
         }
       }
     },
-    "/api/v1/mantine/invoices": {
+    "/api/mantine/invoices": {
       "get": {
         "tags": ["Mantine - Invoices"],
         "parameters": [
@@ -793,7 +793,7 @@
         }
       }
     },
-    "/api/v1/mantine/invoices/{id}": {
+    "/api/mantine/invoices/{id}": {
       "get": {
         "tags": ["Mantine - Invoices"],
         "parameters": [
@@ -890,7 +890,7 @@
         }
       }
     },
-    "/api/v1/mantine/kanban-tasks": {
+    "/api/mantine/kanban-tasks": {
       "get": {
         "tags": ["Mantine - Kanban"],
         "parameters": [
@@ -966,7 +966,7 @@
         }
       }
     },
-    "/api/v1/mantine/kanban-tasks/{id}": {
+    "/api/mantine/kanban-tasks/{id}": {
       "get": {
         "tags": ["Mantine - Kanban"],
         "parameters": [
@@ -1051,7 +1051,7 @@
         }
       }
     },
-    "/api/v1/mantine/orders": {
+    "/api/mantine/orders": {
       "get": {
         "tags": ["Mantine - Orders"],
         "parameters": [
@@ -1173,7 +1173,7 @@
         }
       }
     },
-    "/api/v1/mantine/orders/{id}": {
+    "/api/mantine/orders/{id}": {
       "get": {
         "tags": ["Mantine - Orders"],
         "parameters": [
@@ -1258,7 +1258,7 @@
         }
       }
     },
-    "/api/v1/mantine/projects": {
+    "/api/mantine/projects": {
       "get": {
         "tags": ["Mantine - Projects"],
         "parameters": [
@@ -1372,7 +1372,7 @@
         }
       }
     },
-    "/api/v1/mantine/projects/{id}": {
+    "/api/mantine/projects/{id}": {
       "get": {
         "tags": ["Mantine - Projects"],
         "parameters": [
@@ -1469,7 +1469,7 @@
         }
       }
     },
-    "/api/v1/mantine/sales": {
+    "/api/mantine/sales": {
       "get": {
         "tags": ["Mantine - Sales"],
         "parameters": [
@@ -1568,7 +1568,7 @@
         }
       }
     },
-    "/api/v1/mantine/sales/{id}": {
+    "/api/mantine/sales/{id}": {
       "get": {
         "tags": ["Mantine - Sales"],
         "parameters": [
@@ -1656,7 +1656,7 @@
         }
       }
     },
-    "/api/v1/mantine/stats": {
+    "/api/mantine/stats": {
       "get": {
         "tags": ["Mantine - Analytics"],
         "responses": {
@@ -1669,7 +1669,7 @@
         }
       }
     },
-    "/api/v1/mantine/stats/all": {
+    "/api/mantine/stats/all": {
       "get": {
         "tags": ["Mantine - Analytics"],
         "responses": {
@@ -1682,7 +1682,7 @@
         }
       }
     },
-    "/api/v1/mantine/stats/{id}": {
+    "/api/mantine/stats/{id}": {
       "get": {
         "tags": ["Mantine - Analytics"],
         "parameters": [
@@ -1706,7 +1706,7 @@
         }
       }
     },
-    "/api/v1/mantine/traffic": {
+    "/api/mantine/traffic": {
       "get": {
         "tags": ["Mantine - System Configuration"],
         "parameters": [
@@ -1760,7 +1760,7 @@
         }
       }
     },
-    "/api/v1/mantine/user-profile": {
+    "/api/mantine/user-profile": {
       "get": {
         "tags": ["Mantine - User Profile"],
         "responses": {
@@ -1804,7 +1804,7 @@
         }
       }
     },
-    "/api/v1/audit": {
+    "/api/audit": {
       "get": {
         "tags": ["Audit Logs"],
         "parameters": [
@@ -1861,7 +1861,7 @@
         }
       }
     },
-    "/api/v1/audit/invoice/{invoiceId}": {
+    "/api/audit/invoice/{invoiceId}": {
       "get": {
         "tags": ["Audit Logs"],
         "parameters": [
@@ -1884,7 +1884,7 @@
         }
       }
     },
-    "/api/v1/auth/login": {
+    "/api/auth/login": {
       "post": {
         "tags": ["Authentication"],
         "requestBody": {
@@ -1914,7 +1914,7 @@
         }
       }
     },
-    "/api/v1/auth/register": {
+    "/api/auth/register": {
       "post": {
         "tags": ["Authentication"],
         "requestBody": {
@@ -1944,7 +1944,7 @@
         }
       }
     },
-    "/api/v1/auth/forgot-password": {
+    "/api/auth/forgot-password": {
       "post": {
         "tags": ["Authentication"],
         "requestBody": {
@@ -1974,7 +1974,7 @@
         }
       }
     },
-    "/api/v1/auth/reset-password": {
+    "/api/auth/reset-password": {
       "post": {
         "tags": ["Authentication"],
         "requestBody": {
@@ -2004,7 +2004,7 @@
         }
       }
     },
-    "/api/v1/auth/refresh-token": {
+    "/api/auth/refresh-token": {
       "post": {
         "tags": ["Authentication"],
         "requestBody": {
@@ -2034,7 +2034,7 @@
         }
       }
     },
-    "/api/v1/auth/logout": {
+    "/api/auth/logout": {
       "post": {
         "tags": ["Authentication"],
         "requestBody": {
@@ -2064,7 +2064,7 @@
         }
       }
     },
-    "/api/v1/countries": {
+    "/api/countries": {
       "get": {
         "tags": ["Countries"],
         "parameters": [
@@ -2084,7 +2084,7 @@
         }
       }
     },
-    "/api/v1/countries/{code}": {
+    "/api/countries/{code}": {
       "get": {
         "tags": ["Countries"],
         "parameters": [
@@ -2104,7 +2104,7 @@
         }
       }
     },
-    "/api/v1/languages": {
+    "/api/languages": {
       "get": {
         "tags": ["Languages"],
         "parameters": [
@@ -2124,7 +2124,7 @@
         }
       }
     },
-    "/api/v1/languages/{code}": {
+    "/api/languages/{code}": {
       "get": {
         "tags": ["Languages"],
         "parameters": [
@@ -2144,7 +2144,7 @@
         }
       }
     },
-    "/api/v1/products": {
+    "/api/products": {
       "get": {
         "tags": ["Products"],
         "responses": {
@@ -2196,7 +2196,7 @@
         }
       }
     },
-    "/api/v1/products/{id}": {
+    "/api/products/{id}": {
       "get": {
         "tags": ["Products"],
         "parameters": [
@@ -2296,7 +2296,7 @@
         }
       }
     },
-    "/api/v1/products/category/{category}": {
+    "/api/products/category/{category}": {
       "get": {
         "tags": ["Products"],
         "parameters": [
@@ -2323,7 +2323,7 @@
         }
       }
     },
-    "/api/v1/products/low-stock": {
+    "/api/products/low-stock": {
       "get": {
         "tags": ["Products"],
         "responses": {
@@ -2340,7 +2340,7 @@
         }
       }
     },
-    "/api/v1/products/featured": {
+    "/api/products/featured": {
       "get": {
         "tags": ["Products"],
         "responses": {
@@ -2357,7 +2357,7 @@
         }
       }
     },
-    "/api/v1/products/{id}/stock": {
+    "/api/products/{id}/stock": {
       "patch": {
         "tags": ["Products"],
         "parameters": [
@@ -2408,7 +2408,7 @@
         }
       }
     },
-    "/api/v1/profile": {
+    "/api/profile": {
       "get": {
         "tags": ["User Profile"],
         "responses": {
@@ -2446,7 +2446,7 @@
         }
       }
     },
-    "/api/v1/profile/change-password": {
+    "/api/profile/change-password": {
       "post": {
         "tags": ["User Profile"],
         "requestBody": {
@@ -2476,7 +2476,7 @@
         }
       }
     },
-    "/api/v1/users": {
+    "/api/users": {
       "get": {
         "tags": ["User Management"],
         "parameters": [
@@ -2542,7 +2542,7 @@
         }
       }
     },
-    "/api/v1/users/{id}": {
+    "/api/users/{id}": {
       "get": {
         "tags": ["User Management"],
         "parameters": [
@@ -2618,7 +2618,7 @@
         }
       }
     },
-    "/api/v1/users/{id}/reset-password": {
+    "/api/users/{id}/reset-password": {
       "post": {
         "tags": ["User Management"],
         "parameters": [
@@ -2658,7 +2658,7 @@
         }
       }
     },
-    "/api/v1/users/{id}/roles": {
+    "/api/users/{id}/roles": {
       "put": {
         "tags": ["User Management"],
         "parameters": [
@@ -2707,7 +2707,7 @@
         }
       }
     },
-    "/api/v1/users/{id}/claims": {
+    "/api/users/{id}/claims": {
       "put": {
         "tags": ["User Management"],
         "parameters": [
@@ -2756,7 +2756,7 @@
         }
       }
     },
-    "/api/v1/antd/auction-creators": {
+    "/api/antd/auction-creators": {
       "get": {
         "tags": ["AntdAuctionCreators"],
         "parameters": [
@@ -2864,7 +2864,7 @@
         }
       }
     },
-    "/api/v1/antd/auction-creators/{id}": {
+    "/api/antd/auction-creators/{id}": {
       "get": {
         "tags": ["AntdAuctionCreators"],
         "parameters": [
@@ -2940,7 +2940,7 @@
         }
       }
     },
-    "/api/v1/antd/bidding-top-sellers": {
+    "/api/antd/bidding-top-sellers": {
       "get": {
         "tags": ["AntdBiddingTopSellers"],
         "parameters": [
@@ -3047,7 +3047,7 @@
         }
       }
     },
-    "/api/v1/antd/bidding-top-sellers/{id}": {
+    "/api/antd/bidding-top-sellers/{id}": {
       "get": {
         "tags": ["AntdBiddingTopSellers"],
         "parameters": [
@@ -3123,7 +3123,7 @@
         }
       }
     },
-    "/api/v1/antd/bidding-transactions": {
+    "/api/antd/bidding-transactions": {
       "get": {
         "tags": ["AntdBiddingTransactions"],
         "parameters": [
@@ -3237,7 +3237,7 @@
         }
       }
     },
-    "/api/v1/antd/bidding-transactions/{id}": {
+    "/api/antd/bidding-transactions/{id}": {
       "get": {
         "tags": ["AntdBiddingTransactions"],
         "parameters": [
@@ -3313,7 +3313,7 @@
         }
       }
     },
-    "/api/v1/antd/campaign-ads": {
+    "/api/antd/campaign-ads": {
       "get": {
         "tags": ["Antd - Campaign Ads"],
         "parameters": [
@@ -3442,7 +3442,7 @@
         }
       }
     },
-    "/api/v1/antd/campaign-ads/{id}": {
+    "/api/antd/campaign-ads/{id}": {
       "get": {
         "tags": ["Antd - Campaign Ads"],
         "parameters": [
@@ -3539,7 +3539,7 @@
         }
       }
     },
-    "/api/v1/antd/clients": {
+    "/api/antd/clients": {
       "get": {
         "tags": ["Antd - Clients"],
         "parameters": [
@@ -3676,7 +3676,7 @@
         }
       }
     },
-    "/api/v1/antd/clients/{id}": {
+    "/api/antd/clients/{id}": {
       "get": {
         "tags": ["Antd - Clients"],
         "parameters": [
@@ -3773,7 +3773,7 @@
         }
       }
     },
-    "/api/v1/antd/community-groups": {
+    "/api/antd/community-groups": {
       "get": {
         "tags": ["AntdCommunityGroups"],
         "parameters": [
@@ -3886,7 +3886,7 @@
         }
       }
     },
-    "/api/v1/antd/community-groups/{id}": {
+    "/api/antd/community-groups/{id}": {
       "get": {
         "tags": ["AntdCommunityGroups"],
         "parameters": [
@@ -3971,7 +3971,7 @@
         }
       }
     },
-    "/api/v1/antd/courses": {
+    "/api/antd/courses": {
       "get": {
         "tags": ["AntdCourses"],
         "parameters": [
@@ -4087,7 +4087,7 @@
         }
       }
     },
-    "/api/v1/antd/courses/{id}": {
+    "/api/antd/courses/{id}": {
       "get": {
         "tags": ["AntdCourses"],
         "parameters": [
@@ -4163,7 +4163,7 @@
         }
       }
     },
-    "/api/v1/antd/delivery-analytics": {
+    "/api/antd/delivery-analytics": {
       "get": {
         "tags": ["AntdDeliveryAnalytics"],
         "parameters": [
@@ -4247,7 +4247,7 @@
         }
       }
     },
-    "/api/v1/antd/delivery-analytics/{id}": {
+    "/api/antd/delivery-analytics/{id}": {
       "get": {
         "tags": ["AntdDeliveryAnalytics"],
         "parameters": [
@@ -4326,7 +4326,7 @@
         }
       }
     },
-    "/api/v1/antd/employees": {
+    "/api/antd/employees": {
       "get": {
         "tags": ["Antd - Employees"],
         "parameters": [
@@ -4463,7 +4463,7 @@
         }
       }
     },
-    "/api/v1/antd/employees/statistics": {
+    "/api/antd/employees/statistics": {
       "get": {
         "tags": ["Antd - Employees"],
         "responses": {
@@ -4480,7 +4480,7 @@
         }
       }
     },
-    "/api/v1/antd/employees/{id}": {
+    "/api/antd/employees/{id}": {
       "get": {
         "tags": ["Antd - Employees"],
         "parameters": [
@@ -4577,7 +4577,7 @@
         }
       }
     },
-    "/api/v1/antd/exams": {
+    "/api/antd/exams": {
       "get": {
         "tags": ["AntdExams"],
         "parameters": [
@@ -4707,7 +4707,7 @@
         }
       }
     },
-    "/api/v1/antd/exams/{id}": {
+    "/api/antd/exams/{id}": {
       "get": {
         "tags": ["AntdExams"],
         "parameters": [
@@ -4792,7 +4792,7 @@
         }
       }
     },
-    "/api/v1/antd/faqs": {
+    "/api/antd/faqs": {
       "get": {
         "tags": ["Antd - FAQs"],
         "parameters": [
@@ -4905,7 +4905,7 @@
         }
       }
     },
-    "/api/v1/antd/faqs/featured": {
+    "/api/antd/faqs/featured": {
       "get": {
         "tags": ["Antd - FAQs"],
         "parameters": [
@@ -4933,7 +4933,7 @@
         }
       }
     },
-    "/api/v1/antd/faqs/statistics": {
+    "/api/antd/faqs/statistics": {
       "get": {
         "tags": ["Antd - FAQs"],
         "responses": {
@@ -4950,7 +4950,7 @@
         }
       }
     },
-    "/api/v1/antd/faqs/{id}": {
+    "/api/antd/faqs/{id}": {
       "get": {
         "tags": ["Antd - FAQs"],
         "parameters": [
@@ -5047,7 +5047,7 @@
         }
       }
     },
-    "/api/v1/antd/licenses": {
+    "/api/antd/licenses": {
       "get": {
         "tags": ["Antd - Licenses"],
         "parameters": [
@@ -5145,7 +5145,7 @@
         }
       }
     },
-    "/api/v1/antd/licenses/title/{title}": {
+    "/api/antd/licenses/title/{title}": {
       "get": {
         "tags": ["Antd - Licenses"],
         "parameters": [
@@ -5172,7 +5172,7 @@
         }
       }
     },
-    "/api/v1/antd/licenses/{id}": {
+    "/api/antd/licenses/{id}": {
       "get": {
         "tags": ["Antd - Licenses"],
         "parameters": [
@@ -5269,7 +5269,7 @@
         }
       }
     },
-    "/api/v1/antd/live-auctions": {
+    "/api/antd/live-auctions": {
       "get": {
         "tags": ["AntdLiveAuctions"],
         "parameters": [
@@ -5392,7 +5392,7 @@
         }
       }
     },
-    "/api/v1/antd/live-auctions/{id}": {
+    "/api/antd/live-auctions/{id}": {
       "get": {
         "tags": ["AntdLiveAuctions"],
         "parameters": [
@@ -5468,7 +5468,7 @@
         }
       }
     },
-    "/api/v1/antd/orders": {
+    "/api/antd/orders": {
       "get": {
         "tags": ["Antd - Orders"],
         "parameters": [
@@ -5589,7 +5589,7 @@
         }
       }
     },
-    "/api/v1/antd/orders/recent": {
+    "/api/antd/orders/recent": {
       "get": {
         "tags": ["Antd - Orders"],
         "parameters": [
@@ -5617,7 +5617,7 @@
         }
       }
     },
-    "/api/v1/antd/orders/{id}": {
+    "/api/antd/orders/{id}": {
       "get": {
         "tags": ["Antd - Orders"],
         "parameters": [
@@ -5714,7 +5714,7 @@
         }
       }
     },
-    "/api/v1/antd/pricings": {
+    "/api/antd/pricings": {
       "get": {
         "tags": ["Antd - Pricings"],
         "parameters": [
@@ -5828,7 +5828,7 @@
         }
       }
     },
-    "/api/v1/antd/pricings/plan/{plan}": {
+    "/api/antd/pricings/plan/{plan}": {
       "get": {
         "tags": ["Antd - Pricings"],
         "parameters": [
@@ -5855,7 +5855,7 @@
         }
       }
     },
-    "/api/v1/antd/pricings/{id}": {
+    "/api/antd/pricings/{id}": {
       "get": {
         "tags": ["Antd - Pricings"],
         "parameters": [
@@ -5952,7 +5952,7 @@
         }
       }
     },
-    "/api/v1/antd/products": {
+    "/api/antd/products": {
       "get": {
         "tags": ["Antd - Products"],
         "parameters": [
@@ -6074,7 +6074,7 @@
         }
       }
     },
-    "/api/v1/antd/products/top": {
+    "/api/antd/products/top": {
       "get": {
         "tags": ["Antd - Products"],
         "parameters": [
@@ -6102,7 +6102,7 @@
         }
       }
     },
-    "/api/v1/antd/products/categories": {
+    "/api/antd/products/categories": {
       "get": {
         "tags": ["Antd - Products"],
         "responses": {
@@ -6119,7 +6119,7 @@
         }
       }
     },
-    "/api/v1/antd/products/{id}": {
+    "/api/antd/products/{id}": {
       "get": {
         "tags": ["Antd - Products"],
         "parameters": [
@@ -6216,7 +6216,7 @@
         }
       }
     },
-    "/api/v1/antd/projects": {
+    "/api/antd/projects": {
       "get": {
         "tags": ["Antd - Projects"],
         "parameters": [
@@ -6358,7 +6358,7 @@
         }
       }
     },
-    "/api/v1/antd/projects/{id}": {
+    "/api/antd/projects/{id}": {
       "get": {
         "tags": ["Antd - Projects"],
         "parameters": [
@@ -6455,7 +6455,7 @@
         }
       }
     },
-    "/api/v1/antd/recommended-courses": {
+    "/api/antd/recommended-courses": {
       "get": {
         "tags": ["AntdRecommendedCourses"],
         "parameters": [
@@ -6575,7 +6575,7 @@
         }
       }
     },
-    "/api/v1/antd/recommended-courses/{id}": {
+    "/api/antd/recommended-courses/{id}": {
       "get": {
         "tags": ["AntdRecommendedCourses"],
         "parameters": [
@@ -6660,7 +6660,7 @@
         }
       }
     },
-    "/api/v1/antd/scheduled-posts": {
+    "/api/antd/scheduled-posts": {
       "get": {
         "tags": ["AntdScheduledPosts"],
         "parameters": [
@@ -6767,7 +6767,7 @@
         }
       }
     },
-    "/api/v1/antd/scheduled-posts/{id}": {
+    "/api/antd/scheduled-posts/{id}": {
       "get": {
         "tags": ["AntdScheduledPosts"],
         "parameters": [
@@ -6843,7 +6843,7 @@
         }
       }
     },
-    "/api/v1/antd/sellers": {
+    "/api/antd/sellers": {
       "get": {
         "tags": ["Antd - Sellers"],
         "parameters": [
@@ -6957,7 +6957,7 @@
         }
       }
     },
-    "/api/v1/antd/sellers/top": {
+    "/api/antd/sellers/top": {
       "get": {
         "tags": ["Antd - Sellers"],
         "parameters": [
@@ -6985,7 +6985,7 @@
         }
       }
     },
-    "/api/v1/antd/sellers/{id}": {
+    "/api/antd/sellers/{id}": {
       "get": {
         "tags": ["Antd - Sellers"],
         "parameters": [
@@ -7082,7 +7082,7 @@
         }
       }
     },
-    "/api/v1/antd/social-media-activities": {
+    "/api/antd/social-media-activities": {
       "get": {
         "tags": ["AntdSocialMediaActivities"],
         "parameters": [
@@ -7205,7 +7205,7 @@
         }
       }
     },
-    "/api/v1/antd/social-media-activities/{id}": {
+    "/api/antd/social-media-activities/{id}": {
       "get": {
         "tags": ["AntdSocialMediaActivities"],
         "parameters": [
@@ -7281,7 +7281,7 @@
         }
       }
     },
-    "/api/v1/antd/social-media-stats": {
+    "/api/antd/social-media-stats": {
       "get": {
         "tags": ["AntdSocialMediaStats"],
         "parameters": [
@@ -7358,7 +7358,7 @@
         }
       }
     },
-    "/api/v1/antd/social-media-stats/{id}": {
+    "/api/antd/social-media-stats/{id}": {
       "get": {
         "tags": ["AntdSocialMediaStats"],
         "parameters": [
@@ -7434,7 +7434,7 @@
         }
       }
     },
-    "/api/v1/antd/study-statistics": {
+    "/api/antd/study-statistics": {
       "get": {
         "tags": ["AntdStudyStatistics"],
         "parameters": [
@@ -7524,7 +7524,7 @@
         }
       }
     },
-    "/api/v1/antd/study-statistics/{id}": {
+    "/api/antd/study-statistics/{id}": {
       "get": {
         "tags": ["AntdStudyStatistics"],
         "parameters": [
@@ -7609,7 +7609,7 @@
         }
       }
     },
-    "/api/v1/antd/tasks": {
+    "/api/antd/tasks": {
       "get": {
         "tags": ["Antd - Tasks"],
         "parameters": [
@@ -7752,7 +7752,7 @@
         }
       }
     },
-    "/api/v1/antd/tasks/{id}": {
+    "/api/antd/tasks/{id}": {
       "get": {
         "tags": ["Antd - Tasks"],
         "parameters": [
@@ -7837,7 +7837,7 @@
         }
       }
     },
-    "/api/v1/antd/truck-deliveries": {
+    "/api/antd/truck-deliveries": {
       "get": {
         "tags": ["AntdTruckDeliveries"],
         "parameters": [
@@ -7942,7 +7942,7 @@
         }
       }
     },
-    "/api/v1/antd/truck-deliveries/{id}": {
+    "/api/antd/truck-deliveries/{id}": {
       "get": {
         "tags": ["AntdTruckDeliveries"],
         "parameters": [
@@ -8021,7 +8021,7 @@
         }
       }
     },
-    "/api/v1/antd/truck-delivery-requests": {
+    "/api/antd/truck-delivery-requests": {
       "get": {
         "tags": ["AntdTruckDeliveryRequests"],
         "parameters": [
@@ -8119,7 +8119,7 @@
         }
       }
     },
-    "/api/v1/antd/truck-delivery-requests/{id}": {
+    "/api/antd/truck-delivery-requests/{id}": {
       "get": {
         "tags": ["AntdTruckDeliveryRequests"],
         "parameters": [
@@ -8198,7 +8198,7 @@
         }
       }
     },
-    "/api/v1/antd/trucks": {
+    "/api/antd/trucks": {
       "get": {
         "tags": ["AntdTrucks"],
         "parameters": [
@@ -8296,7 +8296,7 @@
         }
       }
     },
-    "/api/v1/antd/trucks/{id}": {
+    "/api/antd/trucks/{id}": {
       "get": {
         "tags": ["AntdTrucks"],
         "parameters": [

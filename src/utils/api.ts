@@ -106,7 +106,7 @@ export const ApiService = {
    */
   getTasks: async (params?: TasksQueryParams) => {
     const queryString = params ? buildQueryParams(params) : '';
-    const response = await fetch(`/api/v1/antd/tasks${queryString}`);
+    const response = await fetch(`/api/antd/tasks${queryString}`);
     return response.json();
   },
 
@@ -115,7 +115,7 @@ export const ApiService = {
    */
   getProjects: async (params?: ProjectsQueryParams) => {
     const queryString = params ? buildQueryParams(params) : '';
-    const response = await fetch(`/api/v1/antd/projects${queryString}`);
+    const response = await fetch(`/api/antd/projects${queryString}`);
     return response.json();
   },
 };

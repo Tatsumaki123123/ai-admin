@@ -25,12 +25,9 @@ import {
 console.log('[API Client] Module loaded!');
 
 // API Configuration
-const API_HOST = import.meta.env.VITE_API_BASE_URL || 'https://ai.apecode.site';
-// Only append /api if not already present
-const API_BASE_URL = API_HOST.endsWith('/api') ? API_HOST : `${API_HOST}/api`;
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://www.apecode.cc/api').replace(/\/$/, '');
 
 console.log('[API Client] Configuration:', {
-  API_HOST,
   API_BASE_URL,
   storeAvailable: !!store,
 });

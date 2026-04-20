@@ -52,7 +52,7 @@ export type ApiResponse<T> = {
 };
 
 /**
- * Single item response (for GET /api/v1/antd/projects/:id)
+ * Single item response (for GET /api/antd/projects/:id)
  */
 export type SingleItemApiResponse<T> = Omit<ProjectsApiResponse<T>, 'meta'> & {
   meta?: PaginationMeta | null;

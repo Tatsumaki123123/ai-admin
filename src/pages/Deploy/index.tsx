@@ -30,7 +30,7 @@ interface ApiResponse {
 }
 
 const API_BASE = (
-  (import.meta.env.VITE_API_BASE_URL as string) || 'https://ai.apecode.site'
+  (import.meta.env.VITE_API_BASE_URL as string) || 'https://www.apecode.cc'
 )
   .replace(/\/$/, '')
   .replace('http://localhost:5174', window.location.origin);

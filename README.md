@@ -20,7 +20,7 @@
     <img src="https://img.shields.io/static/v1?label=download&message=ZIP&color=green" alt="Download">
   </a>
   <a href="https://app.netlify.com/sites/antd-multipurpose-dashboard/deploys">
-    <img src="https://api.netlify.com/api/v1/badges/453b19f9-2043-402d-a715-41d55db6447a/deploy-status" alt="Netlify Deployment Status">
+    <img src="https://api.netlify.com/api/badges/453b19f9-2043-402d-a715-41d55db6447a/deploy-status" alt="Netlify Deployment Status">
   </a> 
   <a href="https://github.com/design-sparx/antd-multipurpose-dashboard/actions/workflows/chromatic.yml">
     <img src="https://github.com/design-sparx/antd-multipurpose-dashboard/actions/workflows/chromatic.yml/badge.svg" alt="Storybook Deployment Status">

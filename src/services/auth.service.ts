@@ -96,7 +96,7 @@ class AuthService {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
       const response = await fetch(
-        `${API_CONFIG.PROD_BASE_URL}/api/v1${this.AUTH_ENDPOINTS.LOGIN}`,
+        `${API_CONFIG.PROD_BASE_URL}/api${this.AUTH_ENDPOINTS.LOGIN}`,
         {
           method: 'POST',
           headers: {
@@ -138,7 +138,7 @@ class AuthService {
 
       if (token && userEmail) {
         await fetch(
-          `${API_CONFIG.PROD_BASE_URL.replace(/\/$/, '')}/api/v1${
+          `${API_CONFIG.PROD_BASE_URL.replace(/\/$/, '')}/api${
             this.AUTH_ENDPOINTS.LOGOUT
           }`,
           {
@@ -169,7 +169,7 @@ class AuthService {
       if (!refreshToken) return null;
 
       const response = await fetch(
-        `${API_CONFIG.PROD_BASE_URL}/api/v1${this.AUTH_ENDPOINTS.REFRESH}`,
+        `${API_CONFIG.PROD_BASE_URL}/api${this.AUTH_ENDPOINTS.REFRESH}`,
         {
           method: 'POST',
           headers: {

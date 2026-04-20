@@ -55,8 +55,8 @@ export const LandingNav = () => {
 
   const navLinks = [
     { label: '定价', path: '/pricing' },
-    { label: '文档', path: 'https://ai.apecode.site/docs', external: true },
-    { label: '博客', path: 'https://ai.apecode.site/blog', external: true },
+    { label: '文档', path: '/docs', external: true },
+    { label: '博客', path: '/blog', external: true },
     { label: '分销合伙人', path: '/distribution' },
   ];
 

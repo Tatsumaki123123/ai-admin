@@ -6,10 +6,10 @@
 export const API_CONFIG = {
   // Base URLs for different environments
   MOCK_BASE_URL: '/mocks',
-  PROD_BASE_URL: 'https://ai.apecode.site/',
+  PROD_BASE_URL: 'https://www.apecode.cc/',
 
   // API version and dashboard prefix
-  API_VERSION: '/api/v1',
+  API_VERSION: '/api',
   DASHBOARD_PREFIX: '/antd',
 
   // Default to mock data (can be overridden by environment variable)

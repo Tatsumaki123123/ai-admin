@@ -391,7 +391,7 @@ export const LandingPage = () => {
             <div style={{ color: MUTED, marginBottom: 4 }}># 一键调用 Claude API</div>
             <div>
               <span style={{ color: '#7dd3fc' }}>$ curl</span>
-              <span style={{ color: '#fff' }}> -X POST https://ai.apecode.site/api/v1/messages \</span>
+              <span style={{ color: '#fff' }}> -X POST https://www.apecode.cc/api/messages \</span>
             </div>
             <div style={{ paddingLeft: 16 }}>
               <span style={{ color: '#86efac' }}>-H</span>
@@ -431,7 +431,7 @@ export const LandingPage = () => {
               立即体验
             </button>
             <button
-              onClick={() => window.open('https://ai.apecode.site/docs', '_blank')}
+              onClick={() => window.open('https://www.apecode.cc/docs', '_blank')}
               style={{
                 padding: '12px 32px',
                 borderRadius: 10,

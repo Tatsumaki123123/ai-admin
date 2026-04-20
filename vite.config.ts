@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5174,
     proxy: {
       '/api': {
-        target: 'https://ai.apecode.site',
+        target: 'https://www.apecode.cc',
         changeOrigin: true,
         secure: false,
         cookieDomainRewrite: { '*': '' },
