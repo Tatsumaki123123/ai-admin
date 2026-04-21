@@ -106,7 +106,7 @@ export const DeployPage = () => {
 
   const fetchKeys = useCallback(async () => {
     try {
-      const data = await apiClient.get<ApiResponse>('/token/', {
+      const data = await apiClient.get<ApiResponse>('/token', {
         params: { p: 1, size: 100 },
       });
       const items = data?.items || [];

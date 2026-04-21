@@ -29,7 +29,9 @@ export function CCSwitchModal({
     try {
       const values = await form.validateFields();
       const key = record!.key.startsWith('sk-') ? record!.key : `sk-${record!.key}`;
-      const endpoint = ccApp === 'codex' ? `${apiBase}/v1` : apiBase;
+      // 去掉 /api 后缀，导入链接统一用根域名
+      const siteBase = apiBase.replace(/\/api$/, '');
+      const endpoint = ccApp === 'codex' ? `${siteBase}/v1` : siteBase;
       const params = new URLSearchParams();
       params.set('resource', 'provider');
       params.set('app', ccApp);
@@ -42,7 +44,12 @@ export function CCSwitchModal({
       if (values.haiku_model) params.set('haikuModel', values.haiku_model);
       if (values.sonnet_model) params.set('sonnetModel', values.sonnet_model);
       if (values.opus_model) params.set('opusModel', values.opus_model);
-      params.set('homepage', apiBase);
+      params.set('homepage', siteBase);
+      // 用量查询：usageScript 需要 Base64 编码（URL-safe，+ 编为 %2B）
+      const usageScript = `({request:{url:"{{baseUrl}}/api/usage",method:"GET",headers:{"Authorization":"Bearer {{apiKey}}","User-Agent":"cc-switch/1.0"}},extractor:function(response){return {isValid:response.is_active||true,remaining:response.balance,unit:"USD"};}})`;
+      const usageScriptB64 = btoa(unescape(encodeURIComponent(usageScript)));
+      params.set('usageScript', usageScriptB64);
+      params.set('usageEnabled', 'true');
       params.set('enabled', 'true');
       window.open(`ccswitch://v1/import?${params.toString()}`);
       onClose();

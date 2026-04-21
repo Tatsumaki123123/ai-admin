@@ -177,7 +177,7 @@ export const LogsPage = () => {
   // ── Fetch API keys for selector ───────────────────────────────────────────
   const fetchApiKeys = useCallback(async () => {
     try {
-      const items: ApiKeyOption[] = ((await apiClient.get('/token/', {
+      const items: ApiKeyOption[] = ((await apiClient.get('/token', {
         params: { p: 1, size: 100, show_key: true },
       }))?.items || []).map((k: any) => ({
         id: k.id,

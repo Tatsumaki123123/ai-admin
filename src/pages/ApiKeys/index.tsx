@@ -146,7 +146,7 @@ export const ApiKeysPage = () => {
     ) => {
       setLoading(true);
       try {
-        const url = kw.trim() ? '/token/search' : '/token/';
+        const url = kw.trim() ? '/token/search' : '/token';
         const params: Record<string, any> = kw.trim()
           ? { keyword: `%${kw.trim()}%`, p: page, size, show_key: true }
           : { p: page, size, show_key: true };
@@ -224,33 +224,46 @@ export const ApiKeysPage = () => {
   const handleFormOk = async (values: any, editing: ApiKeyItem | null) => {
     setSubmitting(true);
     try {
-      const payload: any = {
-        name: values.name,
-        group: values.group || '',
-        expired_time: values.expired_time
-          ? Math.floor((values.expired_time as Dayjs).valueOf() / 1000)
-          : -1,
-        unlimited_quota: values.unlimited_quota ?? true,
-        remain_quota: values.unlimited_quota
-          ? 0
-          : Math.floor((values.quota || 0) * 500000),
-        model_limits_enabled: values.model_limits_enabled ?? false,
-        model_limits: values.model_limits || '',
-        allow_ips: values.allow_ips || '',
-      };
-
       if (editing) {
-        await apiClient.put(`/token/${editing.id}`, payload);
+        // 编辑模式：传入完整的 token 数据（包括 id）
+        const payload: ApiKeyItem = {
+          ...editing,
+          name: values.name,
+          group: values.group || '',
+          expired_time: values.expired_time
+            ? Math.floor((values.expired_time as Dayjs).valueOf() / 1000)
+            : -1,
+          unlimited_quota: values.unlimited_quota ?? true,
+          remain_quota: values.unlimited_quota
+            ? 0
+            : Math.floor((values.quota || 0) * 500000),
+          model_limits_enabled: !!(values.model_limits && values.model_limits.length > 0),
+          model_limits: Array.isArray(values.model_limits) ? values.model_limits.join(',') : (values.model_limits || ''),
+          allow_ips: values.allow_ips || '',
+          rpm_limit: values.rpm_limit || 0,
+          tpm_limit: values.tpm_limit || 0,
+        };
+        await apiClient.put('/token', payload);
         message.success(t('apiKeys.updateSuccess'));
       } else {
-        const count = values.count || 1;
-        for (let i = 0; i < count; i++) {
-          const name =
-            count > 1
-              ? `${values.name}_${Math.random().toString(36).slice(2, 6)}`
-              : values.name;
-          await apiClient.post('/token/', { ...payload, name });
-        }
+        // 新建模式，固定创建 1 个
+        const payload: any = {
+          name: values.name,
+          group: values.group || '',
+          expired_time: values.expired_time
+            ? Math.floor((values.expired_time as Dayjs).valueOf() / 1000)
+            : -1,
+          unlimited_quota: values.unlimited_quota ?? true,
+          remain_quota: values.unlimited_quota
+            ? 0
+            : Math.floor((values.quota || 0) * 500000),
+          model_limits_enabled: !!(values.model_limits && values.model_limits.length > 0),
+          model_limits: values.model_limits ? values.model_limits.join(',') : '',
+          allow_ips: values.allow_ips || '',
+          rpm_limit: values.rpm_limit || 0,
+          tpm_limit: values.tpm_limit || 0,
+        };
+        await apiClient.post('/token/', payload);
         message.success(t('apiKeys.createSuccess'));
       }
 

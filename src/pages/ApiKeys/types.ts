@@ -15,6 +15,8 @@ export interface ApiKeyItem {
   used_quota: number;
   group: string;
   cross_group_retry: boolean;
+  rpm_limit: number;
+  tpm_limit: number;
   DeletedAt: null | string;
 }
 
