@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Button,
   Card,
@@ -11,6 +11,7 @@ import {
   InputNumber,
   Divider,
   Spin,
+  Modal,
 } from 'antd';
 import {
   ThunderboltFilled,
@@ -19,7 +20,9 @@ import {
   WechatOutlined,
   SwapOutlined,
   GiftOutlined,
+  LoadingOutlined,
 } from '@ant-design/icons';
+import { QRCodeSVG } from 'qrcode.react';
 import { usePageHeader } from '../../hooks/usePageContext';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../redux/store';
@@ -72,6 +75,34 @@ interface PlanItem {
   plan: ApiPlan;
 }
 
+interface PayResponse {
+  data: {
+    device: string;
+    money: string;
+    name: string;
+    notify_url: string;
+    out_trade_no: string;
+    pid: string;
+    return_url: string;
+    sign: string;
+    sign_type: string;
+    type: string;
+  };
+  message: string;
+  url: string;
+}
+
+interface PayModalState {
+  visible: boolean;
+  payUrl: string;
+  money: string;
+  name: string;
+  type: string;
+  out_trade_no: string;
+  submitUrl: string;
+  submitData: Record<string, string>;
+}
+
 // 按量充值预设金额
 const PAYGO_PRESETS = [20, 50, 100, 200, 500, 1000];
 
@@ -89,6 +120,11 @@ export const TopUpPage = () => {
   const [paygoAmount, setPaygoAmount] = useState<number>(100);
   const [plans, setPlans] = useState<PlanItem[]>([]);
   const [plansLoading, setPlansLoading] = useState(false);
+  const [payModal, setPayModal] = useState<PayModalState>({
+    visible: false, payUrl: '', money: '', name: '', type: '', out_trade_no: '', submitUrl: '', submitData: {},
+  });
+  const [paying, setPaying] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const panelBg = isDark ? '#1a1a1a' : '#fff';
   const border = isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb';
@@ -105,6 +141,68 @@ export const TopUpPage = () => {
       .catch(() => { /* ignore */ })
       .finally(() => setPlansLoading(false));
   }, []);
+
+  const handleSubscribe = async (planId: number) => {
+    const payment_method = payMethod === 'wechat' ? 'wxpay' : 'alipay';
+    setPaying(true);
+    try {
+      const res = await apiClient.post<PayResponse>('/subscription/epay/pay', {
+        plan_id: planId,
+        payment_method,
+      });
+      const params = new URLSearchParams();
+      Object.entries(res.data).forEach(([k, v]) => params.set(k, String(v)));
+      const fullPayUrl = `${res.url}?${params.toString()}`;
+      setPayModal({
+        visible: true,
+        payUrl: fullPayUrl,
+        money: res.data.money,
+        name: res.data.name,
+        type: res.data.type,
+        out_trade_no: res.data.out_trade_no,
+        submitUrl: res.url,
+        submitData: res.data as unknown as Record<string, string>,
+      });
+    } catch {
+      message.error('发起支付失败，请重试');
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  const stopPoll = () => {
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+  };
+
+  const startPoll = (out_trade_no: string) => {
+    stopPoll();
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await apiClient.get<{ items: { trade_no: string; status: string }[] }>(
+          '/user/topup/self', { params: { p: 1, page_size: 10 } }
+        );
+        const matched = res.items?.find(
+          (item) => item.trade_no === out_trade_no && item.status === 'success'
+        );
+        if (matched) {
+          stopPoll();
+          message.success('支付成功！订阅已生效');
+          setPayModal((p) => ({ ...p, visible: false }));
+        }
+      } catch { /* ignore */ }
+    }, 3000);
+  };
+
+  // 弹窗打开时启动轮询，关闭时停止
+  useEffect(() => {
+    if (payModal.visible && payModal.out_trade_no) {
+      startPoll(payModal.out_trade_no);
+    } else {
+      stopPoll();
+    }
+    return stopPoll;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payModal.visible, payModal.out_trade_no]);
 
   const payMethods: { value: PayMethod; label: React.ReactNode }[] = [
     {
@@ -374,6 +472,8 @@ export const TopUpPage = () => {
                     border={border}
                     panelBg={panelBg}
                     subText={subText}
+                    paying={paying}
+                    onSubscribe={handleSubscribe}
                   />
                 </Col>
               ))}
@@ -381,6 +481,65 @@ export const TopUpPage = () => {
           )}
         </>
       )}
+
+      {/* ── 支付弹窗 ── */}
+      <Modal
+        open={payModal.visible}
+        onCancel={() => { stopPoll(); setPayModal((p) => ({ ...p, visible: false })); }}
+        footer={
+          <Button block size="large" onClick={() => { stopPoll(); setPayModal((p) => ({ ...p, visible: false })); }}>
+            关闭
+          </Button>
+        }
+        title={payModal.type === 'wxpay' ? '微信扫码支付' : '支付宝扫码支付'}
+        centered
+        width={400}
+        styles={{ body: { textAlign: 'center', padding: '16px 24px 8px' } }}
+      >
+        <Text type="secondary" style={{ fontSize: 13 }}>请支付精确金额</Text>
+        <div style={{ margin: '8px 0 4px' }}>
+          <Text strong style={{ fontSize: 36, color: payModal.type === 'wxpay' ? '#07C160' : '#1677ff' }}>
+            ¥{payModal.money}
+          </Text>
+        </div>
+        <Text type="secondary" style={{ fontSize: 13, display: 'block', marginBottom: 16 }}>
+          {payModal.name}
+        </Text>
+
+        {/* 二维码 */}
+        <div style={{
+          display: 'inline-block',
+          padding: 12,
+          background: '#fff',
+          borderRadius: 12,
+          border: `2px solid ${payModal.type === 'wxpay' ? '#07C160' : '#1677ff'}`,
+          marginBottom: 16,
+        }}>
+          {payModal.payUrl ? (
+            <QRCodeSVG value={payModal.payUrl} size={200} />
+          ) : (
+            <Flex justify="center" align="center" style={{ width: 200, height: 200 }}>
+              <Spin indicator={<LoadingOutlined style={{ fontSize: 32 }} />} />
+            </Flex>
+          )}
+        </div>
+
+        <Text style={{ display: 'block', fontSize: 13, marginBottom: 8 }}>
+          请用{payModal.type === 'wxpay' ? '微信' : '支付宝'}扫描二维码完成支付
+        </Text>
+        <Flex justify="center" align="center" gap={6} style={{ marginBottom: 12 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#52c41a', display: 'inline-block' }} />
+          <Text type="secondary" style={{ fontSize: 12 }}>等待支付确认中...</Text>
+        </Flex>
+        <a
+          href={payModal.payUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: 13, color: payModal.type === 'wxpay' ? '#07C160' : '#1677ff' }}
+        >
+          扫码有问题？点击跳转支付页面
+        </a>
+      </Modal>
     </div>
   );
 };
@@ -392,9 +551,11 @@ interface PlanCardProps {
   border: string;
   panelBg: string;
   subText: string;
+  paying: boolean;
+  onSubscribe: (planId: number) => void;
 }
 
-const PlanCard: React.FC<PlanCardProps> = ({ plan, isDark, border, panelBg, subText }) => {
+const PlanCard: React.FC<PlanCardProps> = ({ plan, isDark, border, panelBg, subText, paying, onSubscribe }) => {
   // total_amount 单位同 quota，除以 500000 得 USD
   const totalUSD = plan.total_amount / 500000;
   // 时长描述
@@ -461,8 +622,9 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, isDark, border, panelBg, subT
       <Button
         type="primary"
         block
+        loading={paying}
         style={{ fontWeight: 600, marginTop: 8 }}
-        onClick={() => message.info('订阅功能开发中，敬请期待')}
+        onClick={() => onSubscribe(plan.id)}
       >
         立即订阅
       </Button>
