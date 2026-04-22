@@ -7,6 +7,7 @@ import {
   Typography,
   Flex,
   Space,
+  Switch,
 } from 'antd';
 import {
   CopyOutlined,
@@ -16,8 +17,6 @@ import {
   EyeInvisibleOutlined,
   CodeOutlined,
   ImportOutlined,
-  CheckCircleFilled,
-  MinusCircleFilled,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
@@ -36,6 +35,7 @@ interface Props {
   onCopyKey: (key: string) => void;
   onEdit: (record: ApiKeyItem) => void;
   onDelete: (id: number) => void;
+  onToggleStatus: (record: ApiKeyItem) => void;
   onUseKey: (record: ApiKeyItem) => void;
   onImportCSS: (record: ApiKeyItem) => void;
   onChange: (pg: TablePaginationConfig) => void;
@@ -96,6 +96,7 @@ export function ApiKeyTable({
   onCopyKey,
   onEdit,
   onDelete,
+  onToggleStatus,
   onUseKey,
   onImportCSS,
   onChange,
@@ -281,20 +282,19 @@ export function ApiKeyTable({
     {
       title: '状态',
       key: 'status',
-      width: 72,
+      width: 80,
       align: 'center' as const,
-      render: (_, r) =>
-        r.status === 1 ? (
-          <Flex align="center" justify="center" gap={4}>
-            <CheckCircleFilled style={{ color: '#52c41a', fontSize: 13 }} />
-            <Text style={{ color: '#52c41a', fontSize: 12 }}>活跃</Text>
-          </Flex>
-        ) : (
-          <Flex align="center" justify="center" gap={4}>
-            <MinusCircleFilled style={{ color: '#bfbfbf', fontSize: 13 }} />
-            <Text style={{ color: '#bfbfbf', fontSize: 12 }}>停用</Text>
-          </Flex>
-        ),
+      render: (_, r) => (
+        <Tooltip title={r.status === 1 ? '点击禁用' : '点击启用'}>
+          <Switch
+            size="small"
+            checked={r.status === 1}
+            onChange={() => onToggleStatus(r)}
+            checkedChildren="启用"
+            unCheckedChildren="禁用"
+          />
+        </Tooltip>
+      ),
     },
 
     // ── Last accessed ────────────────────────────────────────────────────────
@@ -308,6 +308,24 @@ export function ApiKeyTable({
           <Text style={{ color: sub, fontSize: 12 }}>{dt}</Text>
         ) : (
           <Text style={{ color: sub, fontSize: 12, fontStyle: 'italic' }}>未使用</Text>
+        );
+      },
+    },
+
+    // ── Rate limit ───────────────────────────────────────────────────────────
+    {
+      title: '速率限制',
+      key: 'rate',
+      width: 130,
+      render: (_, r) => {
+        const hasRpm = r.rpm_limit && r.rpm_limit > 0;
+        const hasTpm = r.tpm_limit && r.tpm_limit > 0;
+        if (!hasRpm && !hasTpm) return <Text style={{ color: sub, fontSize: 12 }}>不限</Text>;
+        return (
+          <div style={{ lineHeight: 1.8, fontSize: 12 }}>
+            {hasRpm && <div><Text style={{ color: sub }}>RPM </Text><Text strong>{r.rpm_limit}</Text></div>}
+            {hasTpm && <div><Text style={{ color: sub }}>TPM </Text><Text strong>{r.tpm_limit}</Text></div>}
+          </div>
         );
       },
     },
@@ -376,7 +394,7 @@ export function ApiKeyTable({
         style: { padding: '12px 20px' },
       }}
       onChange={onChange}
-      scroll={{ x: 1300 }}
+      scroll={{ x: 1450 }}
       size="middle"
       rowClassName={() => 'api-key-row'}
     />

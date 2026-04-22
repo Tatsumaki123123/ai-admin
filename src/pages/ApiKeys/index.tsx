@@ -146,13 +146,13 @@ export const ApiKeysPage = () => {
     ) => {
       setLoading(true);
       try {
-        const url = kw.trim() ? '/token/search' : '/token';
-        const params: Record<string, any> = kw.trim()
-          ? { keyword: `%${kw.trim()}%`, p: page, size, show_key: true }
-          : { p: page, size, show_key: true };
+        const hasFilter = kw.trim() || group || status !== '';
+        const params: Record<string, any> = { p: page, size, show_key: true };
+        if (kw.trim()) params.keyword = `%${kw.trim()}%`;
         if (group) params.group = group;
         if (status !== '') params.status = status;
 
+        const url = hasFilter ? '/token/search' : '/token/';
         const data = await apiClient.get<ApiResponse>(url, { params });
         setApiKeys(data.items);
         setPagination((p) => ({
@@ -221,6 +221,17 @@ export const ApiKeysPage = () => {
     }
   };
 
+  const handleToggleStatus = async (record: ApiKeyItem) => {
+    const newStatus = record.status === 1 ? 2 : 1;
+    try {
+      await apiClient.put('/token/?status_only=true', { id: record.id, status: newStatus });
+      message.success(newStatus === 1 ? '已启用' : '已禁用');
+      fetchApiKeys(pagination.current as number, pagination.pageSize as number, keyword);
+    } catch {
+      message.error('操作失败');
+    }
+  };
+
   const handleFormOk = async (values: any, editing: ApiKeyItem | null) => {
     setSubmitting(true);
     try {
@@ -233,10 +244,8 @@ export const ApiKeysPage = () => {
           expired_time: values.expired_time
             ? Math.floor((values.expired_time as Dayjs).valueOf() / 1000)
             : -1,
-          unlimited_quota: values.unlimited_quota ?? true,
-          remain_quota: values.unlimited_quota
-            ? 0
-            : Math.floor((values.quota || 0) * 500000),
+          unlimited_quota: !values.quota || values.quota === 0,
+          remain_quota: values.quota ? Math.floor(values.quota * 500000) : 0,
           model_limits_enabled: !!(values.model_limits && values.model_limits.length > 0),
           model_limits: Array.isArray(values.model_limits) ? values.model_limits.join(',') : (values.model_limits || ''),
           allow_ips: values.allow_ips || '',
@@ -253,10 +262,8 @@ export const ApiKeysPage = () => {
           expired_time: values.expired_time
             ? Math.floor((values.expired_time as Dayjs).valueOf() / 1000)
             : -1,
-          unlimited_quota: values.unlimited_quota ?? true,
-          remain_quota: values.unlimited_quota
-            ? 0
-            : Math.floor((values.quota || 0) * 500000),
+          unlimited_quota: !values.quota || values.quota === 0,
+          remain_quota: values.quota ? Math.floor(values.quota * 500000) : 0,
           model_limits_enabled: !!(values.model_limits && values.model_limits.length > 0),
           model_limits: values.model_limits ? values.model_limits.join(',') : '',
           allow_ips: values.allow_ips || '',
@@ -290,6 +297,7 @@ export const ApiKeysPage = () => {
     { label: t('apiKeys.allStatus'), value: '' },
     { label: t('apiKeys.active'), value: '1' },
     { label: t('apiKeys.inactive'), value: '2' },
+    { label: '已过期', value: '3' },
   ];
 
   const openaiEndpoint = `${API_BASE}/v1`;
@@ -428,6 +436,7 @@ export const ApiKeysPage = () => {
             setFormVisible(true);
           }}
           onDelete={handleDelete}
+          onToggleStatus={handleToggleStatus}
           onUseKey={(r) => {
             setUseKeyRecord(r);
             setUseKeyVisible(true);

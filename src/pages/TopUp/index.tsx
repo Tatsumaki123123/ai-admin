@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -10,17 +10,11 @@ import {
   Typography,
   InputNumber,
   Divider,
-  Badge,
+  Spin,
 } from 'antd';
 import {
-  CheckOutlined,
   ThunderboltFilled,
   StarFilled,
-  CrownFilled,
-  RocketFilled,
-  TeamOutlined,
-  ShopOutlined,
-  BankOutlined,
   AlipayCircleOutlined,
   WechatOutlined,
   SwapOutlined,
@@ -31,6 +25,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../redux/store';
 import { PRIMARY_COLOR, hexToRgba } from '../../theme/colors';
 import { message } from 'antd';
+import apiClient from '../../services/api/apiClient';
 
 const { Text } = Typography;
 
@@ -51,143 +46,31 @@ const SUPPORTED_MODELS = [
 type PayMethod = 'wechat' | 'alipay' | 'usdt';
 type BillingTab = 'paygo' | 'monthly';
 
-interface Plan {
-  key: string;
-  name: string;
-  badge?: string;
-  desc: string;
-  price: number;
-  dailyQuota: number;
-  monthlyEquiv: number;
-  savings: string;
-  perUnit: string;
-  features: string[];
-  recommended?: boolean;
-  icon: React.ReactNode;
+interface ApiPlan {
+  id: number;
+  title: string;
+  subtitle: string;
+  price_amount: number;
+  currency: string;
+  duration_unit: string;
+  duration_value: number;
+  custom_seconds: number;
+  enabled: boolean;
+  sort_order: number;
+  stripe_price_id: string;
+  creem_product_id: string;
+  max_purchase_per_user: number;
+  upgrade_group: string;
+  total_amount: number;
+  quota_reset_period: string;
+  quota_reset_custom_seconds: number;
+  created_at: number;
+  updated_at: number;
 }
 
-const PLANS: Plan[] = [
-  {
-    key: 'starter',
-    name: '入门版',
-    badge: '入门',
-    desc: '个人开发者，日常编程辅助',
-    price: 199,
-    dailyQuota: 15,
-    monthlyEquiv: 450,
-    savings: '94%',
-    perUnit: '0.44',
-    features: [
-      '支持 Claude / GPT / Codex 全系列',
-      '每日零点自动刷新额度',
-      '可与按量付费余额同时使用',
-    ],
-    icon: <ThunderboltFilled />,
-  },
-  {
-    key: 'lite',
-    name: '轻量版',
-    badge: '',
-    desc: '个人开发者，日常编程辅助',
-    price: 339,
-    dailyQuota: 30,
-    monthlyEquiv: 900,
-    savings: '95%',
-    perUnit: '0.38',
-    features: [
-      '支持 Claude / GPT / Codex 全系列',
-      '每日零点自动刷新额度',
-      '可与按量付费余额同时使用',
-    ],
-    icon: <RocketFilled />,
-  },
-  {
-    key: 'standard',
-    name: '标准版',
-    badge: '推荐',
-    desc: '重度代码编写，长文档分析',
-    price: 499,
-    dailyQuota: 50,
-    monthlyEquiv: 1500,
-    savings: '95%',
-    perUnit: '0.33',
-    features: [
-      '支持 Claude / GPT / Codex 全系列',
-      '每日零点自动刷新额度',
-      '可与按量付费余额同时使用',
-    ],
-    recommended: true,
-    icon: <StarFilled />,
-  },
-  {
-    key: 'pro',
-    name: '高级版',
-    badge: '进阶',
-    desc: '全职独立开发者，AI 极客',
-    price: 1188,
-    dailyQuota: 126,
-    monthlyEquiv: 3600,
-    savings: '95%',
-    perUnit: '0.33',
-    features: [
-      '支持 Claude / GPT / Codex 全系列',
-      '每日零点自动刷新额度',
-      '可与按量付费余额同时使用',
-    ],
-    icon: <CrownFilled />,
-  },
-  {
-    key: 'team',
-    name: '团队版',
-    badge: '团队',
-    desc: '精英用户，小型工作室',
-    price: 1888,
-    dailyQuota: 200,
-    monthlyEquiv: 6000,
-    savings: '96%',
-    perUnit: '0.31',
-    features: [
-      '支持 Claude / GPT / Codex 全系列',
-      '每日零点自动刷新额度',
-      '可与按量付费余额同时使用',
-    ],
-    icon: <TeamOutlined />,
-  },
-  {
-    key: 'business',
-    name: '商业版',
-    badge: '旗舰',
-    desc: '深度商业用户，中大型工作室',
-    price: 4688,
-    dailyQuota: 500,
-    monthlyEquiv: 15000,
-    savings: '96%',
-    perUnit: '0.31',
-    features: [
-      '支持 Claude / GPT / Codex 全系列',
-      '每日零点自动刷新额度',
-      '可与按量付费余额同时使用',
-    ],
-    icon: <ShopOutlined />,
-  },
-  {
-    key: 'enterprise',
-    name: '企业版',
-    badge: '旗舰',
-    desc: '深度商业用户，中大型工作室',
-    price: 9188,
-    dailyQuota: 1000,
-    monthlyEquiv: 30000,
-    savings: '96%',
-    perUnit: '0.31',
-    features: [
-      '支持 Claude / GPT / Codex 全系列',
-      '每日零点自动刷新额度',
-      '可与按量付费余额同时使用',
-    ],
-    icon: <BankOutlined />,
-  },
-];
+interface PlanItem {
+  plan: ApiPlan;
+}
 
 // 按量充值预设金额
 const PAYGO_PRESETS = [20, 50, 100, 200, 500, 1000];
@@ -204,10 +87,24 @@ export const TopUpPage = () => {
   const [payMethod, setPayMethod] = useState<PayMethod>('wechat');
   const [billingTab, setBillingTab] = useState<BillingTab>('monthly');
   const [paygoAmount, setPaygoAmount] = useState<number>(100);
+  const [plans, setPlans] = useState<PlanItem[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
 
   const panelBg = isDark ? '#1a1a1a' : '#fff';
   const border = isDark ? 'rgba(255,255,255,0.08)' : '#e5e7eb';
   const subText = isDark ? 'rgba(255,255,255,0.45)' : '#94a3b8';
+
+  useEffect(() => {
+    setPlansLoading(true);
+    apiClient.get<PlanItem[]>('/subscription/plans')
+      .then((data) => {
+        const list = Array.isArray(data) ? data : [];
+        // 按 sort_order 排序，过滤掉未启用的
+        setPlans(list.filter((p) => p.plan.enabled).sort((a, b) => a.plan.sort_order - b.plan.sort_order));
+      })
+      .catch(() => { /* ignore */ })
+      .finally(() => setPlansLoading(false));
+  }, []);
 
   const payMethods: { value: PayMethod; label: React.ReactNode }[] = [
     {
@@ -456,29 +353,32 @@ export const TopUpPage = () => {
       {/* ── 月卡订阅 ── */}
       {billingTab === 'monthly' && (
         <>
-          <Text
-            style={{
-              fontSize: 13,
-              color: subText,
-              display: 'block',
-              marginBottom: 16,
-            }}
-          >
+          <Text style={{ fontSize: 13, color: subText, display: 'block', marginBottom: 16 }}>
             每日固定额度 · 每日零点刷新 · 不累积 · 支持全部 Claude 模型
           </Text>
-          <Row gutter={[16, 16]}>
-            {PLANS.map((plan) => (
-              <Col key={plan.key} xs={24} sm={12} xl={6}>
-                <PlanCard
-                  plan={plan}
-                  isDark={isDark}
-                  border={border}
-                  panelBg={panelBg}
-                  subText={subText}
-                />
-              </Col>
-            ))}
-          </Row>
+          {plansLoading ? (
+            <Flex justify="center" style={{ padding: '60px 0' }}>
+              <Spin size="large" />
+            </Flex>
+          ) : plans.length === 0 ? (
+            <Flex justify="center" style={{ padding: '60px 0' }}>
+              <Text style={{ color: subText }}>暂无可用套餐</Text>
+            </Flex>
+          ) : (
+            <Row gutter={[16, 16]}>
+              {plans.map((item) => (
+                <Col key={item.plan.id} xs={24} sm={12} xl={6}>
+                  <PlanCard
+                    plan={item.plan}
+                    isDark={isDark}
+                    border={border}
+                    panelBg={panelBg}
+                    subText={subText}
+                  />
+                </Col>
+              ))}
+            </Row>
+          )}
         </>
       )}
     </div>
@@ -487,143 +387,85 @@ export const TopUpPage = () => {
 
 /* ── 单个套餐卡片 ── */
 interface PlanCardProps {
-  plan: Plan;
+  plan: ApiPlan;
   isDark: boolean;
   border: string;
   panelBg: string;
   subText: string;
 }
 
-const PlanCard: React.FC<PlanCardProps> = ({
-  plan,
-  isDark,
-  border,
-  panelBg,
-  subText,
-}) => {
-  const cardBorder = plan.recommended
-    ? `1px solid ${PRIMARY_COLOR}`
-    : `1px solid ${border}`;
+const PlanCard: React.FC<PlanCardProps> = ({ plan, isDark, border, panelBg, subText }) => {
+  // total_amount 单位同 quota，除以 500000 得 USD
+  const totalUSD = plan.total_amount / 500000;
+  // 时长描述
+  const durationLabel = plan.duration_unit === 'month'
+    ? `${plan.duration_value} 个月`
+    : plan.duration_unit === 'day'
+    ? `${plan.duration_value} 天`
+    : `${plan.duration_value} ${plan.duration_unit}`;
 
-  const cardBg = plan.recommended
-    ? isDark
-      ? hexToRgba(PRIMARY_COLOR, 0.06)
-      : hexToRgba(PRIMARY_COLOR, 0.03)
-    : panelBg;
+  const cardBorder = `1px solid ${border}`;
+  const cardBg = panelBg;
 
   return (
-    <Badge.Ribbon
-      text={plan.badge || undefined}
-      color={plan.recommended ? PRIMARY_COLOR : 'rgba(0,0,0,0)'}
-      style={{
-        display: plan.badge ? 'block' : 'none',
-        fontWeight: 600,
-        fontSize: 11,
-      }}
+    <Card
+      style={{ border: cardBorder, background: cardBg, height: '100%' }}
+      styles={{ body: { padding: '20px 20px 16px' } }}
     >
-      <Card
-        style={{ border: cardBorder, background: cardBg, height: '100%' }}
-        styles={{ body: { padding: '20px 20px 16px' } }}
+      {/* 名称 */}
+      <Flex align="center" gap={8} style={{ marginBottom: 4 }}>
+        <StarFilled style={{ color: PRIMARY_COLOR, fontSize: 16 }} />
+        <Text strong style={{ fontSize: 15 }}>{plan.title}</Text>
+      </Flex>
+      {plan.subtitle && (
+        <Text style={{ fontSize: 12, color: subText, display: 'block', marginBottom: 12 }}>
+          {plan.subtitle}
+        </Text>
+      )}
+
+      {/* 价格 */}
+      <div style={{ marginBottom: 6 }}>
+        <Text strong style={{ fontSize: 28, color: PRIMARY_COLOR }}>
+          {plan.currency === 'USD' ? '$' : '¥'}{plan.price_amount.toLocaleString()}
+        </Text>
+        <Text style={{ fontSize: 13, color: subText }}>/{durationLabel}</Text>
+      </div>
+
+      {/* 总额度 */}
+      <div
+        style={{
+          background: isDark ? 'rgba(255,255,255,0.06)' : '#f8fafc',
+          border: `1px solid ${border}`,
+          borderRadius: 6,
+          padding: '6px 12px',
+          marginBottom: 14,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+        }}
       >
-        {/* 名称 */}
-        <Flex align="center" gap={8} style={{ marginBottom: 4 }}>
-          <span style={{ color: PRIMARY_COLOR, fontSize: 16 }}>
-            {plan.icon}
-          </span>
-          <Text strong style={{ fontSize: 15 }}>
-            {plan.name}
-          </Text>
-        </Flex>
-        <Text
-          style={{
-            fontSize: 12,
-            color: subText,
-            display: 'block',
-            marginBottom: 12,
-          }}
-        >
-          {plan.desc}
+        <Text style={{ fontSize: 12, color: subText }}>总额度</Text>
+        <Text strong style={{ fontSize: 13, color: PRIMARY_COLOR }}>
+          ${totalUSD.toLocaleString()}
         </Text>
+      </div>
 
-        {/* 价格 */}
-        <div style={{ marginBottom: 6 }}>
-          <Text strong style={{ fontSize: 28, color: PRIMARY_COLOR }}>
-            ¥{plan.price.toLocaleString()}
-          </Text>
-          <Text style={{ fontSize: 13, color: subText }}>/月</Text>
-        </div>
-
-        {/* 节省比例 */}
-        <Text
-          style={{
-            fontSize: 12,
-            color: subText,
-            display: 'block',
-            marginBottom: 10,
-          }}
-        >
-          相比官方省 {plan.savings}% · ≈¥{plan.perUnit}/美金
+      {/* 额度重置周期 */}
+      {plan.quota_reset_period && plan.quota_reset_period !== 'never' && (
+        <Text style={{ fontSize: 12, color: subText, display: 'block', marginBottom: 10 }}>
+          额度重置：{plan.quota_reset_period}
         </Text>
+      )}
 
-        {/* 每日额度 */}
-        <div
-          style={{
-            background: isDark ? 'rgba(255,255,255,0.06)' : '#f8fafc',
-            border: `1px solid ${border}`,
-            borderRadius: 6,
-            padding: '6px 12px',
-            marginBottom: 14,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-          }}
-        >
-          <Text style={{ fontSize: 12, color: subText }}>每日额度</Text>
-          <Text strong style={{ fontSize: 13, color: PRIMARY_COLOR }}>
-            ${plan.dailyQuota}
-          </Text>
-          <Text style={{ fontSize: 12, color: subText }}>
-            ≈ 月 ${plan.monthlyEquiv}
-          </Text>
-        </div>
-
-        {/* 特性列表 */}
-        <ul style={{ margin: '0 0 16px', paddingLeft: 0, listStyle: 'none' }}>
-          {plan.features.map((f) => (
-            <li
-              key={f}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 6,
-                marginBottom: 4,
-              }}
-            >
-              <CheckOutlined
-                style={{
-                  color: PRIMARY_COLOR,
-                  fontSize: 12,
-                  marginTop: 3,
-                  flexShrink: 0,
-                }}
-              />
-              <Text style={{ fontSize: 12, color: subText, lineHeight: 1.6 }}>
-                {f}
-              </Text>
-            </li>
-          ))}
-        </ul>
-
-        {/* 按钮 */}
-        <Button
-          type={plan.recommended ? 'primary' : 'default'}
-          block
-          style={{ fontWeight: 600 }}
-          onClick={() => message.info('订阅功能开发中，敬请期待')}
-        >
-          立即订阅
-        </Button>
-      </Card>
-    </Badge.Ribbon>
+      {/* 按钮 */}
+      <Button
+        type="primary"
+        block
+        style={{ fontWeight: 600, marginTop: 8 }}
+        onClick={() => message.info('订阅功能开发中，敬请期待')}
+      >
+        立即订阅
+      </Button>
+    </Card>
   );
 };
