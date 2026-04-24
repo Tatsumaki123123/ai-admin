@@ -45,8 +45,8 @@ export function KeyFormModal({ visible, editingRecord, groups, submitting, onOk,
   const isDark = mytheme === 'dark';
   const [form] = Form.useForm();
 
-  const [unlimitedQuota, setUnlimitedQuota] = useState(true);
-  const [quotaValue, setQuotaValue] = useState(0);
+  const [_unlimitedQuota, setUnlimitedQuota] = useState(true);
+  const [_quotaValue, setQuotaValue] = useState(0);
   const [expiryEnabled, setExpiryEnabled] = useState(false);
   const [expiryPreset, setExpiryPreset] = useState<ExpiryPreset>(30);
   const [ipLimitEnabled, setIpLimitEnabled] = useState(false);
