@@ -21,16 +21,57 @@ import {
   isMockOnlyEndpoint,
 } from './mockEndpointMapper';
 
-// DEBUG: Module loaded
-console.log('[API Client] Module loaded!');
 
 // API Configuration
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'https://www.apecode.cc/api').replace(/\/$/, '');
 
-console.log('[API Client] Configuration:', {
-  API_BASE_URL,
-  storeAvailable: !!store,
-});
+// ---------------------------------------------------------------------------
+// Turnstile token store
+//
+// These endpoints require a Cloudflare Turnstile token passed as the
+// `turnstile` query-string parameter (checked by new-api middleware).
+// The request interceptor below reads the current token from this store and
+// appends it automatically — callers never need to touch the URL themselves.
+// ---------------------------------------------------------------------------
+
+/** Endpoints that require ?turnstile=<token> */
+const TURNSTILE_REQUIRED_PATHS = [
+  '/user/register',
+  '/user/login',
+  '/verification',
+  '/reset_password',
+  '/user/checkin',
+] as const;
+
+/** Module-level singleton that holds the latest Turnstile token. */
+let _turnstileToken: string = '';
+
+/** Call this from the Turnstile widget's onSuccess callback. */
+export function setTurnstileToken(token: string): void {
+  _turnstileToken = token;
+}
+
+/** Call this on widget expire / error / after a failed request. */
+export function clearTurnstileToken(): void {
+  _turnstileToken = '';
+}
+
+/** Read the current token (used by the interceptor). */
+export function getTurnstileToken(): string {
+  return _turnstileToken;
+}
+
+/**
+ * Returns true when the given URL path matches one of the Turnstile-protected
+ * endpoints.  Handles both bare paths (/user/login) and paths that already
+ * carry a query string (/user/login?foo=bar).
+ */
+function requiresTurnstile(url: string): boolean {
+  // Strip query string before matching
+  const path = url.split('?')[0];
+  return TURNSTILE_REQUIRED_PATHS.some((p) => path.endsWith(p));
+}
+
 
 /**
  * Create axios instance with default configuration
@@ -45,33 +86,21 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-console.log('[API Client] Axios instance created');
 
 /**
  * Request Interceptor
  * - Checks dataMode to route to mock or real API
  * - Adds authorization token to all requests
  */
-console.log('[API Client] Setting up request interceptor...');
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    console.log('[API Client] ===== INTERCEPTOR CALLED =====');
-    console.log('[API Client] Request URL:', config.url);
-    console.log('[API Client] Request Method:', config.method);
 
     // Get current data mode from Redux store
     const state = store.getState();
     const useMockData = state.dataMode?.useMockData ?? false;
 
-    // DEBUG: Log the actual state value
-    console.log('[API Client Debug] Redux State:', {
-      fullState: state,
-      dataModeState: state.dataMode,
-      useMockData: useMockData,
-      storeExists: !!store,
-    });
-
+  
     // Get the request URL
     const requestUrl = config.url || '';
 
@@ -121,6 +150,27 @@ apiClient.interceptors.request.use(
     const currentUser = tokenStorage.getUser();
     if (currentUser?.id && config.headers) {
       config.headers['new-api-user'] = String(currentUser.id);
+    }
+
+    // Inject Turnstile token as query-string param for protected endpoints.
+    // Skip entirely in dev when VITE_DISABLE_TURNSTILE=true.
+    if (
+      requiresTurnstile(requestUrl) &&
+      import.meta.env.VITE_DISABLE_TURNSTILE !== 'true'
+    ) {
+      // In dev, use the fixed token from env if provided — no widget needed.
+      const devToken = import.meta.env.DEV
+        ? (import.meta.env.VITE_TURNSTILE_DEV_TOKEN as string | undefined)
+        : undefined;
+      const token = devToken || getTurnstileToken();
+      if (token) {
+        config.params = { ...config.params, turnstile: token };
+        if (import.meta.env.DEV) {
+          console.log(`[Turnstile] Injected ${devToken ? 'dev' : 'widget'} token for ${requestUrl}`);
+        }
+      } else if (import.meta.env.DEV) {
+        console.warn(`[Turnstile] No token available for ${requestUrl} — request may be rejected by server`);
+      }
     }
 
     // Log request in development
@@ -299,7 +349,7 @@ export const handleApiError = (error: unknown): ApiErrorResponse => {
  */
 export const apiRequest = {
   get: <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    console.log('[apiRequest.get] Called with URL:', url);
+  
     return apiClient.get<T>(url, config).then((response) => response.data);
   },
 
@@ -308,7 +358,6 @@ export const apiRequest = {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> => {
-    console.log('[apiRequest.post] Called with URL:', url);
     return apiClient
       .post<T>(url, data, config)
       .then((response) => response.data);
@@ -319,7 +368,6 @@ export const apiRequest = {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> => {
-    console.log('[apiRequest.put] Called with URL:', url);
     return apiClient
       .put<T>(url, data, config)
       .then((response) => response.data);
@@ -330,19 +378,17 @@ export const apiRequest = {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> => {
-    console.log('[apiRequest.patch] Called with URL:', url);
     return apiClient
       .patch<T>(url, data, config)
       .then((response) => response.data);
   },
 
   delete: <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    console.log('[apiRequest.delete] Called with URL:', url);
+  
     return apiClient.delete<T>(url, config).then((response) => response.data);
   },
 };
 
-console.log('[API Client] apiRequest wrapper exported');
 
 /**
  * Wrapped apiClient — all methods resolve directly to the response data,

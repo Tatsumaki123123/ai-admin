@@ -22,6 +22,9 @@ export const authService = {
    * Login with username and password
    * Session-based authentication: Server returns Set-Cookie header with session ID
    * Browser automatically manages the cookie with withCredentials: true
+   *
+   * The Turnstile token (if required) is injected automatically by the
+   * apiClient request interceptor — no need to pass it here.
    */
   login: async (credentials: LoginDto): Promise<LoginResponse> => {
     const response = await apiRequest.post<LoginResponse>(
@@ -78,6 +81,9 @@ export const authService = {
 
   /**
    * Register a new user
+   *
+   * The Turnstile token (if required) is injected automatically by the
+   * apiClient request interceptor — no need to pass it here.
    */
   register: async (userData: RegisterDto): Promise<ApiResponseOfObject> => {
     const response = await apiRequest.post<ApiResponseOfObject>(

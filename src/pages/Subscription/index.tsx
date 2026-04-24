@@ -1,12 +1,56 @@
-import { Card, Button, Typography, Flex, List } from 'antd';
-import { CalendarOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import { Card, Button, Typography, Flex, List, Tag, Progress, Spin } from 'antd';
+import { CalendarOutlined, CheckCircleFilled, ClockCircleOutlined } from '@ant-design/icons';
 import { usePageHeader } from '../../hooks/usePageContext';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../redux/store';
-import { PRIMARY_COLOR } from '../../theme/colors';
+import { PRIMARY_COLOR, hexToRgba } from '../../theme/colors';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../../services/api/apiClient';
 
 const { Text, Title } = Typography;
+
+interface Subscription {
+  id: number;
+  user_id: number;
+  plan_id: number;
+  amount_total: number;
+  amount_used: number;
+  start_time: number;
+  end_time: number;
+  status: string;
+  source: string;
+  last_reset_time: number;
+  next_reset_time: number;
+  upgrade_group: string;
+  prev_user_group: string;
+  created_at: number;
+  updated_at: number;
+}
+
+interface SubItem {
+  subscription: Subscription;
+}
+
+interface SubResponse {
+  all_subscriptions: SubItem[];
+  subscriptions: SubItem[];
+  billing_preference: string;
+}
+
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  active:   { label: '生效中', color: '#52c41a' },
+  expired:  { label: '已过期', color: '#8c8c8c' },
+  cancelled:{ label: '已取消', color: '#ff4d4f' },
+  pending:  { label: '待生效', color: '#faad14' },
+};
+
+const formatTs = (ts: number) =>
+  ts > 0
+    ? new Date(ts * 1000).toLocaleDateString('zh-CN', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+      })
+    : '—';
 
 const NOTES = [
   '月卡提供每日固定 USD 额度，每日零点（UTC+8）自动刷新',
@@ -17,80 +61,166 @@ const NOTES = [
 ];
 
 export const SubscriptionPage = () => {
-  usePageHeader({
-    title: '我的订阅',
-    description: '管理你的月卡订阅。',
-  });
+  usePageHeader({ title: '我的订阅', description: '管理你的月卡订阅。' });
 
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const isDark = mytheme === 'dark';
   const navigate = useNavigate();
 
+  const [data, setData] = useState<SubResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient.get<SubResponse>('/subscription/self')
+      .then((res) => setData(res))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   const borderColor = isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0';
   const cardBg = isDark ? '#1a1a1a' : '#fff';
-  const subTextColor = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+  const sub = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+
+  const activeSubs = data?.subscriptions ?? [];
+  const allSubs = data?.all_subscriptions ?? [];
+  const hasActive = activeSubs.length > 0;
 
   return (
     <div>
-      {/* Empty state card */}
-      <Card
-        style={{
-          background: cardBg,
-          border: `1px solid ${borderColor}`,
-          borderRadius: 12,
-          marginBottom: 16,
-        }}
-        styles={{ body: { padding: '60px 24px' } }}
-      >
-        <Flex vertical align="center" gap={12}>
-          <CalendarOutlined
-            style={{
-              fontSize: 48,
-              color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
-            }}
-          />
-          <Title level={4} style={{ margin: 0 }}>
-            暂无有效订阅
-          </Title>
-          <Text style={{ color: subTextColor, textAlign: 'center' }}>
-            订阅月卡套餐，享受每日固定额度和更优惠的价格。
-          </Text>
-          <Button
-            type="primary"
-            size="large"
-            style={{
-              marginTop: 8,
-              background: PRIMARY_COLOR,
-              borderColor: PRIMARY_COLOR,
-              borderRadius: 8,
-              fontWeight: 600,
-            }}
-            onClick={() => navigate('/purchase')}
-          >
-            浏览套餐
-          </Button>
+      {loading ? (
+        <Flex justify="center" style={{ padding: '80px 0' }}>
+          <Spin size="large" />
         </Flex>
-      </Card>
+      ) : hasActive ? (
+        <>
+          {/* 当前生效订阅 */}
+          {activeSubs.map(({ subscription: s }) => {
+            const usedPct = s.amount_total > 0
+              ? Math.min(100, Math.round((s.amount_used / s.amount_total) * 100))
+              : 0;
+            const totalUSD = (s.amount_total / 500000).toFixed(2);
+            const usedUSD  = (s.amount_used  / 500000).toFixed(2);
+            const cfg = STATUS_CONFIG[s.status] ?? { label: s.status, color: PRIMARY_COLOR };
+            const daysLeft = s.end_time > 0
+              ? Math.max(0, Math.ceil((s.end_time - Date.now() / 1000) / 86400))
+              : null;
 
-      {/* Notes card */}
-      <Card
-        style={{
-          background: cardBg,
-          border: `1px solid ${borderColor}`,
-          borderRadius: 12,
-        }}
-      >
-        <Title level={5} style={{ marginTop: 0, marginBottom: 16 }}>
-          月卡说明
-        </Title>
+            return (
+              <Card
+                key={s.id}
+                style={{ background: cardBg, border: `1px solid ${hexToRgba(PRIMARY_COLOR, 0.3)}`, borderRadius: 12, marginBottom: 16 }}
+                styles={{ body: { padding: '20px 24px' } }}
+              >
+                <Flex justify="space-between" align="flex-start" wrap="wrap" gap={12}>
+                  <Flex align="center" gap={10}>
+                    <CheckCircleFilled style={{ color: '#52c41a', fontSize: 20 }} />
+                    <div>
+                      <Flex align="center" gap={8}>
+                        <Text strong style={{ fontSize: 16 }}>套餐 #{s.plan_id}</Text>
+                        <Tag style={{
+                          color: cfg.color,
+                          background: hexToRgba(cfg.color, 0.1),
+                          border: `1px solid ${hexToRgba(cfg.color, 0.3)}`,
+                          fontWeight: 600, borderRadius: 6,
+                        }}>{cfg.label}</Tag>
+                      </Flex>
+                      <Text style={{ color: sub, fontSize: 13 }}>
+                        {formatTs(s.start_time)} — {formatTs(s.end_time)}
+                        {daysLeft !== null && (
+                          <span style={{ marginLeft: 8, color: daysLeft <= 7 ? '#faad14' : sub }}>
+                            （剩余 {daysLeft} 天）
+                          </span>
+                        )}
+                      </Text>
+                    </div>
+                  </Flex>
+                  <Button type="primary" onClick={() => navigate('/purchase')}>续费</Button>
+                </Flex>
+
+                {/* 额度进度 */}
+                <div style={{ marginTop: 16 }}>
+                  <Flex justify="space-between" style={{ marginBottom: 6 }}>
+                    <Text style={{ fontSize: 13, color: sub }}>额度使用</Text>
+                    <Text style={{ fontSize: 13 }}>
+                      <Text strong>${usedUSD}</Text>
+                      <Text style={{ color: sub }}> / ${totalUSD}</Text>
+                    </Text>
+                  </Flex>
+                  <Progress
+                    percent={usedPct}
+                    strokeColor={usedPct >= 90 ? '#ff4d4f' : usedPct >= 70 ? '#faad14' : PRIMARY_COLOR}
+                    trailColor={isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'}
+                    showInfo={false}
+                    size="small"
+                  />
+                </div>
+              </Card>
+            );
+          })}
+
+          {/* 历史订阅（非当前生效的） */}
+          {allSubs.filter(({ subscription: s }) =>
+            !activeSubs.some((a) => a.subscription.id === s.id)
+          ).length > 0 && (
+            <Card
+              style={{ background: cardBg, border: `1px solid ${borderColor}`, borderRadius: 12, marginBottom: 16 }}
+              styles={{ body: { padding: '16px 24px' } }}
+            >
+              <Text strong style={{ display: 'block', marginBottom: 12 }}>历史订阅</Text>
+              {allSubs
+                .filter(({ subscription: s }) => !activeSubs.some((a) => a.subscription.id === s.id))
+                .map(({ subscription: s }) => {
+                  const cfg = STATUS_CONFIG[s.status] ?? { label: s.status, color: '#8c8c8c' };
+                  return (
+                    <Flex key={s.id} justify="space-between" align="center"
+                      style={{ padding: '8px 0', borderBottom: `1px solid ${borderColor}` }}
+                    >
+                      <Flex align="center" gap={8}>
+                        <ClockCircleOutlined style={{ color: sub }} />
+                        <Text style={{ color: sub, fontSize: 13 }}>套餐 #{s.plan_id}</Text>
+                        <Text style={{ color: sub, fontSize: 12 }}>
+                          {formatTs(s.start_time)} — {formatTs(s.end_time)}
+                        </Text>
+                      </Flex>
+                      <Tag style={{
+                        color: cfg.color,
+                        background: hexToRgba(cfg.color, 0.1),
+                        border: `1px solid ${hexToRgba(cfg.color, 0.3)}`,
+                        borderRadius: 6,
+                      }}>{cfg.label}</Tag>
+                    </Flex>
+                  );
+                })}
+            </Card>
+          )}
+        </>
+      ) : (
+        /* 空状态 */
+        <Card
+          style={{ background: cardBg, border: `1px solid ${borderColor}`, borderRadius: 12, marginBottom: 16 }}
+          styles={{ body: { padding: '60px 24px' } }}
+        >
+          <Flex vertical align="center" gap={12}>
+            <CalendarOutlined style={{ fontSize: 48, color: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)' }} />
+            <Title level={4} style={{ margin: 0 }}>暂无有效订阅</Title>
+            <Text style={{ color: sub, textAlign: 'center' }}>
+              订阅月卡套餐，享受每日固定额度和更优惠的价格。
+            </Text>
+            <Button type="primary" size="large" style={{ marginTop: 8, fontWeight: 600 }} onClick={() => navigate('/purchase')}>
+              浏览套餐
+            </Button>
+          </Flex>
+        </Card>
+      )}
+
+      {/* 月卡说明 */}
+      <Card style={{ background: cardBg, border: `1px solid ${borderColor}`, borderRadius: 12 }}>
+        <Title level={5} style={{ marginTop: 0, marginBottom: 16 }}>月卡说明</Title>
         <List
           dataSource={NOTES}
           renderItem={(item) => (
             <List.Item style={{ border: 'none', padding: '4px 0' }}>
-              <Text style={{ color: subTextColor }}>
-                <span style={{ marginRight: 8 }}>•</span>
-                {item}
-              </Text>
+              <Text style={{ color: sub }}><span style={{ marginRight: 8 }}>•</span>{item}</Text>
             </List.Item>
           )}
         />

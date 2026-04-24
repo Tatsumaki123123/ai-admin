@@ -92,8 +92,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     try {
       await authService.register(userData);
-      // After successful registration, you might want to auto-login
-      // or redirect to login page
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;

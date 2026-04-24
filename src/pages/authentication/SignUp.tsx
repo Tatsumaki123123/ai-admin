@@ -16,13 +16,15 @@ import {
 import { MoonOutlined, SunOutlined } from '@ant-design/icons';
 import { Verify as PuzzleCaptcha } from 'react-puzzle-captcha';
 import 'react-puzzle-captcha/dist/react-puzzle-captcha.css';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { PATH_AUTH } from '../../constants';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme } from '../../redux/theme/themeSlice';
 import { RootState } from '../../redux/store';
+import { apiRequest, setTurnstileToken, clearTurnstileToken } from '../../services/api/apiClient';
 
 const { Title, Text, Link } = Typography;
 
@@ -32,6 +34,11 @@ type FieldType = {
   cPassword?: string;
   invitationCode?: string;
 };
+
+interface ServerStatus {
+  turnstile_check: boolean;
+  turnstile_site_key: string;
+}
 
 export const SignUpPage = () => {
   const {
@@ -44,6 +51,28 @@ export const SignUpPage = () => {
   const [formInstance] = Form.useForm();
   const [imageCodeVerified, setImageCodeVerified] = useState(false);
   const [verifyModalVisible, setVerifyModalVisible] = useState(false);
+
+  const [serverStatus, setServerStatus] = useState<ServerStatus | null>(null);
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const turnstileRef = useRef<any>(null);
+
+  // Fetch server status to check if Turnstile is enabled
+  useEffect(() => {
+    apiRequest.get<any>('/status').then((data) => {
+      // VITE_DISABLE_TURNSTILE=true → skip widget entirely
+      const disabled = import.meta.env.VITE_DISABLE_TURNSTILE === 'true';
+      // VITE_TURNSTILE_DEV_TOKEN → interceptor handles it, no widget needed
+      const hasDevToken = import.meta.env.DEV && !!import.meta.env.VITE_TURNSTILE_DEV_TOKEN;
+      const turnstileCheck = (disabled || hasDevToken) ? false : (data?.turnstile_check ?? false);
+      const devSiteKey = import.meta.env.VITE_TURNSTILE_DEV_SITE_KEY as string | undefined;
+      const siteKey = (import.meta.env.DEV && devSiteKey)
+        ? devSiteKey
+        : (data?.turnstile_site_key ?? '');
+      setServerStatus({ turnstile_check: turnstileCheck, turnstile_site_key: siteKey });
+    }).catch(() => {
+      setServerStatus({ turnstile_check: false, turnstile_site_key: '' });
+    });
+  }, []);
 
   const handleVerify = () => {
     setImageCodeVerified(true);
@@ -64,6 +93,12 @@ export const SignUpPage = () => {
       return;
     }
 
+    // If Turnstile is enabled, require a valid token
+    if (serverStatus?.turnstile_check && !turnstileReady) {
+      message.error('请先完成人机验证');
+      return;
+    }
+
     try {
       message.open({
         type: 'loading',
@@ -71,7 +106,6 @@ export const SignUpPage = () => {
         duration: 0,
       });
 
-      // Call register using AuthContext
       await auth.register({
         username: values.email,
         email: values.email,
@@ -91,6 +125,12 @@ export const SignUpPage = () => {
     } catch (error: any) {
       message.destroy();
       message.error(error.message || 'Registration failed');
+      // Reset widget so user gets a fresh token on retry
+      if (serverStatus?.turnstile_check) {
+        clearTurnstileToken();
+        setTurnstileReady(false);
+        turnstileRef.current?.reset();
+      }
     }
   };
 
@@ -241,12 +281,31 @@ export const SignUpPage = () => {
                 />
               </Form.Item>
 
+              {/* Turnstile widget — only rendered when server has it enabled */}
+              {serverStatus?.turnstile_check && serverStatus.turnstile_site_key && (
+                <Form.Item>
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={serverStatus.turnstile_site_key}
+                    onSuccess={(token) => { setTurnstileToken(token); setTurnstileReady(true); }}
+                    onExpire={() => { clearTurnstileToken(); setTurnstileReady(false); }}
+                    onError={() => {
+                      clearTurnstileToken();
+                      setTurnstileReady(false);
+                      message.error('人机验证加载失败，请刷新重试');
+                    }}
+                    options={{ theme: mytheme === 'dark' ? 'dark' : 'light' }}
+                  />
+                </Form.Item>
+              )}
+
               <Form.Item style={{ marginBottom: 0 }}>
                 <Button
                   type="primary"
                   htmlType="submit"
                   size="large"
                   loading={auth.isLoading}
+                  disabled={serverStatus?.turnstile_check ? !turnstileReady : false}
                   block
                   style={{ background: '#C17856', borderColor: '#C17856' }}
                 >

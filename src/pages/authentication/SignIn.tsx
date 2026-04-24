@@ -14,14 +14,16 @@ import {
   Typography,
 } from 'antd';
 import { MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { Turnstile } from '@marsidev/react-turnstile';
 
 import { PATH_AUTH, PATH_DASHBOARD } from '../../constants';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme } from '../../redux/theme/themeSlice';
 import { RootState } from '../../redux/store';
+import { apiRequest, setTurnstileToken, clearTurnstileToken } from '../../services/api/apiClient';
 
 const { Title, Text, Link } = Typography;
 
@@ -30,6 +32,11 @@ type FieldType = {
   password?: string;
   remember?: boolean;
 };
+
+interface ServerStatus {
+  turnstile_check: boolean;
+  turnstile_site_key: string;
+}
 
 export const SignInPage = () => {
   const {
@@ -43,6 +50,29 @@ export const SignInPage = () => {
   const [formInstance] = Form.useForm();
 
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [serverStatus, setServerStatus] = useState<ServerStatus | null>(null);
+  // turnstileReady tracks whether the widget has produced a valid token,
+  // used only to enable/disable the submit button.
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const turnstileRef = useRef<any>(null);
+
+  // Fetch server status to check if Turnstile is enabled
+  useEffect(() => {
+    apiRequest.get<any>('/status').then((data) => {
+      // VITE_DISABLE_TURNSTILE=true → skip widget entirely
+      const disabled = import.meta.env.VITE_DISABLE_TURNSTILE === 'true';
+      // VITE_TURNSTILE_DEV_TOKEN → interceptor handles it, no widget needed
+      const hasDevToken = import.meta.env.DEV && !!import.meta.env.VITE_TURNSTILE_DEV_TOKEN;
+      const turnstileCheck = (disabled || hasDevToken) ? false : (data?.turnstile_check ?? false);
+      const devSiteKey = import.meta.env.VITE_TURNSTILE_DEV_SITE_KEY as string | undefined;
+      const siteKey = (import.meta.env.DEV && devSiteKey)
+        ? devSiteKey
+        : (data?.turnstile_site_key ?? '');
+      setServerStatus({ turnstile_check: turnstileCheck, turnstile_site_key: siteKey });
+    }).catch(() => {
+      setServerStatus({ turnstile_check: false, turnstile_site_key: '' });
+    });
+  }, []);
 
   // Monitor authentication status and redirect when user logs in
   useEffect(() => {
@@ -55,6 +85,12 @@ export const SignInPage = () => {
   }, [auth.isAuthenticated, isRedirecting, navigate, location]);
 
   const onFinish = async (values: any) => {
+    // If Turnstile is enabled, require a valid token
+    if (serverStatus?.turnstile_check && !turnstileReady) {
+      message.error('请先完成人机验证');
+      return;
+    }
+
     try {
       message.open({
         type: 'loading',
@@ -62,20 +98,20 @@ export const SignInPage = () => {
         duration: 0,
       });
 
-      // Call login using AuthContext
-      await auth.login({
-        username: values.username!,
-        password: values.password!,
-      });
+      await auth.login({ username: values.username!, password: values.password! });
 
       message.destroy();
       message.success('Login successful! Redirecting to dashboard...', 1);
-
-      // Set flag to trigger redirect in useEffect
       setIsRedirecting(true);
     } catch (err: any) {
       message.destroy();
       message.error(err.message || 'Login failed. Please try again.');
+      // Reset widget so user gets a fresh token on retry
+      if (serverStatus?.turnstile_check) {
+        clearTurnstileToken();
+        setTurnstileReady(false);
+        turnstileRef.current?.reset();
+      }
     }
   };
 
@@ -183,12 +219,31 @@ export const SignInPage = () => {
                 <Checkbox>Remember me</Checkbox>
               </Form.Item>
 
+              {/* Turnstile widget — only rendered when server has it enabled */}
+              {serverStatus?.turnstile_check && serverStatus.turnstile_site_key && (
+                <Form.Item>
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={serverStatus.turnstile_site_key}
+                    onSuccess={(token) => { setTurnstileToken(token); setTurnstileReady(true); }}
+                    onExpire={() => { clearTurnstileToken(); setTurnstileReady(false); }}
+                    onError={() => {
+                      clearTurnstileToken();
+                      setTurnstileReady(false);
+                      message.error('人机验证加载失败，请刷新重试');
+                    }}
+                    options={{ theme: mytheme === 'dark' ? 'dark' : 'light' }}
+                  />
+                </Form.Item>
+              )}
+
               <Form.Item style={{ marginBottom: 0 }}>
                 <Button
                   type="primary"
                   htmlType="submit"
                   size="large"
                   loading={auth.isLoading}
+                  disabled={serverStatus?.turnstile_check ? !turnstileReady : false}
                   block
                   style={{
                     background: colorPrimary,
