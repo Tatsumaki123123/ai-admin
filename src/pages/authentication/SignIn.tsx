@@ -164,9 +164,11 @@ export const SignInPage = () => {
               layout="vertical"
               style={{ width: '100%' }}
               initialValues={{
-                username: 'a@a.com',
-                password: 'abcd.1234',
                 remember: true,
+                ...(import.meta.env.DEV && {
+                  username: 'a@a.com',
+                  password: 'abcd.1234',
+                }),
               }}
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}

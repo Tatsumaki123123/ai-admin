@@ -184,9 +184,11 @@ export const SignUpPage = () => {
               style={{ width: '100%' }}
               initialValues={{
                 remember: true,
-                email: 'a@a.com',
-                password: '12345678',
-                cPassword: '12345678',
+                ...(import.meta.env.DEV && {
+                  email: 'a@a.com',
+                  password: '12345678',
+                  cPassword: '12345678',
+                }),
               }}
               onFinish={onFinish}
               onFinishFailed={onFinishFailed}

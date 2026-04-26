@@ -22,6 +22,11 @@ export const API_ENDPOINTS = {
     SELF: '/user/self',
   },
 
+  // ==================== DASHBOARD DATA ====================
+  DATA: {
+    SELF: '/data/self',
+  },
+
   // ==================== USER MANAGEMENT ====================
   USERS: {
     LIST: '/users',

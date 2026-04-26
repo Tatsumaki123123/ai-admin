@@ -16,6 +16,9 @@ interface Subscription {
   plan_id: number;
   amount_total: number;
   amount_used: number;
+  daily_amount_limit: number;
+  daily_amount_used: number;
+  daily_reset_time: number;
   start_time: number;
   end_time: number;
   status: string;
@@ -137,10 +140,10 @@ export const SubscriptionPage = () => {
                   <Button type="primary" onClick={() => navigate('/purchase')}>续费</Button>
                 </Flex>
 
-                {/* 额度进度 */}
+                {/* 总额度进度 */}
                 <div style={{ marginTop: 16 }}>
                   <Flex justify="space-between" style={{ marginBottom: 6 }}>
-                    <Text style={{ fontSize: 13, color: sub }}>额度使用</Text>
+                    <Text style={{ fontSize: 13, color: sub }}>总额度使用</Text>
                     <Text style={{ fontSize: 13 }}>
                       <Text strong>${usedUSD}</Text>
                       <Text style={{ color: sub }}> / ${totalUSD}</Text>
@@ -154,6 +157,52 @@ export const SubscriptionPage = () => {
                     size="small"
                   />
                 </div>
+
+                {/* 每日额度进度 */}
+                {s.daily_amount_limit > 0 && (() => {
+                  const dailyUsedPct = Math.min(100, Math.round((s.daily_amount_used / s.daily_amount_limit) * 100));
+                  const dailyLimitUSD = (s.daily_amount_limit / 500000).toFixed(2);
+                  const dailyUsedUSD  = (s.daily_amount_used  / 500000).toFixed(2);
+                  const resetTs = s.daily_reset_time > 0 ? s.daily_reset_time : s.next_reset_time;
+                  const resetStr = resetTs > 0
+                    ? new Date(resetTs * 1000).toLocaleTimeString('zh-CN', {
+                        month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit',
+                      })
+                    : '—';
+                  return (
+                    <div style={{
+                      marginTop: 12,
+                      padding: '12px 14px',
+                      borderRadius: 8,
+                      background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                      border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                    }}>
+                      <Flex justify="space-between" align="center" style={{ marginBottom: 6 }}>
+                        <Flex align="center" gap={6}>
+                          <ClockCircleOutlined style={{ color: sub, fontSize: 13 }} />
+                          <Text style={{ fontSize: 13, color: sub }}>今日额度</Text>
+                        </Flex>
+                        <Flex align="center" gap={8}>
+                          <Text style={{ fontSize: 13 }}>
+                            <Text strong>${dailyUsedUSD}</Text>
+                            <Text style={{ color: sub }}> / ${dailyLimitUSD}</Text>
+                          </Text>
+                          <Text style={{ fontSize: 12, color: sub }}>
+                            重置于 {resetStr}
+                          </Text>
+                        </Flex>
+                      </Flex>
+                      <Progress
+                        percent={dailyUsedPct}
+                        strokeColor={dailyUsedPct >= 90 ? '#ff4d4f' : dailyUsedPct >= 70 ? '#faad14' : '#1890ff'}
+                        trailColor={isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'}
+                        showInfo={false}
+                        size="small"
+                      />
+                    </div>
+                  );
+                })()}
               </Card>
             );
           })}

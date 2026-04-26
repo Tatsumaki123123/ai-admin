@@ -298,11 +298,7 @@ export const LogsPage = () => {
       },
     },
     {
-      title: (
-        <Tooltip title="首 Token 延迟 / 总延迟">
-          <span>⚡ Token</span>
-        </Tooltip>
-      ),
+      title: '⚡ 首Token',
       key: 'firstToken',
       width: 110,
       align: 'center' as const,
