@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Button, Typography, Flex, List, Tag, Progress, Spin } from 'antd';
+import { Card, Button, Typography, Flex, List, Tag, Progress, Spin, Row, Col } from 'antd';
 import { CalendarOutlined, CheckCircleFilled, ClockCircleOutlined } from '@ant-design/icons';
 import { usePageHeader } from '../../hooks/usePageContext';
 import { useSelector } from 'react-redux';
@@ -96,7 +96,8 @@ export const SubscriptionPage = () => {
         </Flex>
       ) : hasActive ? (
         <>
-          {/* 当前生效订阅 */}
+          {/* 当前生效订阅 — 一行 3 个 */}
+          <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
           {activeSubs.map(({ subscription: s }) => {
             const usedPct = s.amount_total > 0
               ? Math.min(100, Math.round((s.amount_used / s.amount_total) * 100))
@@ -109,9 +110,9 @@ export const SubscriptionPage = () => {
               : null;
 
             return (
+              <Col key={s.id} xs={24} sm={12} lg={8}>
               <Card
-                key={s.id}
-                style={{ background: cardBg, border: `1px solid ${hexToRgba(PRIMARY_COLOR, 0.3)}`, borderRadius: 12, marginBottom: 16 }}
+                style={{ background: cardBg, border: `1px solid ${hexToRgba(PRIMARY_COLOR, 0.3)}`, borderRadius: 12, height: '100%' }}
                 styles={{ body: { padding: '20px 24px' } }}
               >
                 <Flex justify="space-between" align="flex-start" wrap="wrap" gap={12}>
@@ -204,9 +205,10 @@ export const SubscriptionPage = () => {
                   );
                 })()}
               </Card>
+              </Col>
             );
           })}
-
+          </Row>
           {/* 历史订阅（非当前生效的） */}
           {allSubs.filter(({ subscription: s }) =>
             !activeSubs.some((a) => a.subscription.id === s.id)

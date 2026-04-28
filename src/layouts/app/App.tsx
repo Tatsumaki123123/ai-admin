@@ -47,7 +47,12 @@ import {
 } from '../../hooks/usePageContext';
 import { PRIMARY_COLOR } from '../../theme/colors';
 import { useTranslation } from 'react-i18next';
+import apiClient from '../../services/api/apiClient';
+
 const { Content } = Layout;
+
+/** Poll interval for balance refresh: 60 seconds */
+const BALANCE_POLL_INTERVAL = 60_000;
 
 type AppLayoutProps = {
   children?: ReactNode;
@@ -72,9 +77,39 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const { user, isAuthenticated } = useSelector(
     (state: RootState) => state.auth
   );
-  const { user: authUser, logout: authLogout } = useAuth();
+  const { user: authUser, logout: authLogout, updateUser, isAuthenticated: authIsAuthenticated } = useAuth();
   const { i18n } = useTranslation();
   const currentLang = i18n.language?.startsWith('zh') ? 'zh' : 'en';
+
+  // ── Live balance (polled from /user/self every 60s) ──────────────────────
+  const [liveQuota, setLiveQuota] = useState<number | null>(null);
+
+  const refreshBalance = useCallback(async () => {
+    try {
+      const data: any = await apiClient.get('/user/self');
+      if (data && typeof data.quota === 'number') {
+        setLiveQuota(data.quota);
+        updateUser(data);
+      }
+    } catch {
+      // silently ignore — stale value stays
+    }
+  }, [updateUser]);
+
+  useEffect(() => {
+    if (!authIsAuthenticated) return;
+    refreshBalance();
+    const timer = setInterval(refreshBalance, BALANCE_POLL_INTERVAL);
+    return () => clearInterval(timer);
+  }, [authIsAuthenticated, refreshBalance]);
+
+  // Use live quota when available, fall back to authUser.quota
+  const rawQuota = liveQuota ?? (authUser as any)?.quota ?? 0;
+  const userBalance = `$${(rawQuota / 500000).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
   const displayName =
     (authUser as any)?.display_name ||
     (authUser as any)?.username ||
@@ -82,10 +117,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     user?.email?.split('@')[0] ||
     'User';
   const userInitials = displayName.substring(0, 1).toUpperCase();
-  const userRole = (authUser as any)?.role === 0 ? 'Admin' : 'User';
-  const userBalance = `$${(((authUser as any)?.quota || 0) / 500000).toFixed(
-    2
-  )}`;
+  const userRole = (authUser as any)?.role === 100 ? 'Admin' : 'User';
   const setPageContext = useCallback((context: PageHeaderState) => {
     setPageHeader({
       title: context.title ?? null,
