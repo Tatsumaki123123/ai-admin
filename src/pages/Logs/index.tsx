@@ -123,8 +123,8 @@ function StatCard({
   iconColor: string;
   isDark: boolean;
 }) {
-  const bg = isDark ? '#1a1a1a' : '#fff';
-  const border = isDark ? 'rgba(255,255,255,0.08)' : '#eaecf0';
+  const bg = isDark ? '#1e1e1e' : '#ffffff';
+  const border = isDark ? 'rgba(255,255,255,0.08)' : '#EAECF0';
   const subColor = isDark ? 'rgba(255,255,255,0.38)' : 'rgba(0,0,0,0.38)';
   return (
     <div
@@ -162,8 +162,8 @@ export const LogsPage = () => {
 
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const isDark = mytheme === 'dark';
-  const border = isDark ? 'rgba(255,255,255,0.08)' : '#eaecf0';
-  const cardBg = isDark ? '#1a1a1a' : '#fff';
+  const border = isDark ? 'rgba(255,255,255,0.08)' : '#EAECF0';
+  const cardBg = isDark ? '#1e1e1e' : '#ffffff';
   const sub = isDark ? 'rgba(255,255,255,0.38)' : 'rgba(0,0,0,0.38)';
 
   // ── State ────────────────────────────────────────────────────────────────────
@@ -408,25 +408,16 @@ export const LogsPage = () => {
         </Col>
       </Row>
 
-      {/* ── Table card ─────────────────────────────────────────────────────── */}
+      {/* ── Toolbar — 独立圆角卡片 ─────────────────────────────────────────── */}
       <div
         style={{
           background: cardBg,
           border: `1px solid ${border}`,
           borderRadius: 12,
-          overflow: 'hidden',
+          padding: '14px 20px',
         }}
       >
-        {/* toolbar */}
-        <Flex
-          align="center"
-          gap={10}
-          wrap="wrap"
-          style={{
-            padding: '14px 20px',
-            borderBottom: `1px solid ${border}`,
-          }}
-        >
+        <Flex align="center" gap={10} wrap="wrap">
           <Select
             value={selectedKeyId}
             onChange={(v) => setSelectedKeyId(v)}
@@ -456,8 +447,17 @@ export const LogsPage = () => {
             导出 CSV
           </Button>
         </Flex>
+      </div>
 
-        {/* table */}
+      {/* ── Table — 独立圆角卡片 ───────────────────────────────────────────── */}
+      <div
+        style={{
+          background: cardBg,
+          border: `1px solid ${border}`,
+          borderRadius: 12,
+          overflow: 'hidden',
+        }}
+      >
         <Table<LogItem>
           columns={columns}
           dataSource={logs}

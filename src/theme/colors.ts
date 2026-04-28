@@ -61,5 +61,44 @@ export const hexToRgba = (hex: string, alpha: number) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-// Primary color (same for both themes as the algorithm adjusts it)
+// Primary color — warm orange-brown
 export const PRIMARY_COLOR = '#da7658';
+
+// Horizon UI semantic colors — adapted for #da7658 warm palette
+export const HORIZON = {
+  // brand palette (warm orange-brown)
+  brand: {
+    50: '#fdf0eb',
+    100: '#f8d7cc',
+    200: '#f1b8a7',
+    300: '#ea9982',
+    400: '#e17f64',
+    500: '#da7658',
+    600: '#c46446',
+    700: '#a85136',
+    800: '#7f3c28',
+    900: '#55281b',
+  },
+  // page backgrounds
+  bgLight: '#FBF7F5',       // 极浅暖米色，呼应橙棕主色
+  bgDark: '#1A1210',        // 深暖棕黑
+  // navy sidebar / dark surfaces
+  navyLight: '#2C1A14',
+  navyDark: '#1A1210',
+  // card backgrounds
+  cardLight: '#ffffff',
+  cardDark: '#241812',
+  // subtle text
+  secondaryText: '#A08070',
+  // ── 渐变系列 ──────────────────────────────────────────────
+  // 主渐变：亮橙 → 橙棕（按钮、左侧装饰区）
+  gradient: 'linear-gradient(135deg, #F0956A 0%, #da7658 60%, #C46446 100%)',
+  // 深色模式渐变：稍暗，避免过曝
+  gradientDark: 'linear-gradient(135deg, #C46446 0%, #A85136 100%)',
+  // 柔和渐变：用于 hover、tag、badge 等次要场景
+  gradientSoft: 'linear-gradient(135deg, #FDEEE8 0%, #F8D7CC 100%)',
+  // 高光渐变：亮橙 → 金黄，用于特殊强调
+  gradientGold: 'linear-gradient(135deg, #F0956A 0%, #E8B86D 100%)',
+  // 暗色卡片渐变：深棕 → 更深，用于 dark 模式装饰区
+  gradientDeep: 'linear-gradient(135deg, #3D2218 0%, #1A1210 100%)',
+} as const;

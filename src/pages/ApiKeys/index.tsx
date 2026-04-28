@@ -105,8 +105,8 @@ export const ApiKeysPage = () => {
   const { mytheme } = useSelector((state: RootState) => state.theme);
   const isDark = mytheme === 'dark';
 
-  const borderColor = isDark ? 'rgba(255,255,255,0.08)' : '#e8edf5';
-  const cardBg = isDark ? '#141414' : '#fff';
+  const borderColor = isDark ? 'rgba(255,255,255,0.08)' : '#EAECF0';
+  const cardBg = isDark ? '#1e1e1e' : '#ffffff';
   const bannerBg = isDark
     ? 'linear-gradient(135deg, rgba(22,119,255,0.08) 0%, rgba(114,46,209,0.06) 100%)'
     : 'linear-gradient(135deg, #f0f6ff 0%, #f5f0ff 100%)';
@@ -327,22 +327,21 @@ export const ApiKeysPage = () => {
         </Flex>
       </div>
 
-      {/* ── Main card ───────────────────────────────────────────────────────── */}
+      {/* ── Toolbar + Table — 无外层卡片，表格自带圆角 ─────────────────── */}
+      {/* toolbar */}
       <div
         style={{
           background: cardBg,
           border: `1px solid ${borderColor}`,
           borderRadius: 12,
-          overflow: 'hidden',
+          padding: '14px 20px',
         }}
       >
-        {/* toolbar */}
         <Flex
           justify="space-between"
           align="center"
           wrap="wrap"
           gap={10}
-          style={{ padding: '16px 20px', borderBottom: `1px solid ${borderColor}` }}
         >
           <Flex gap={8} wrap="wrap" align="center">
             <Input.Search
@@ -365,13 +364,7 @@ export const ApiKeysPage = () => {
               value={filterGroup}
               onChange={(v) => {
                 setFilterGroup(v);
-                fetchApiKeys(
-                  1,
-                  pagination.pageSize as number,
-                  keyword,
-                  v,
-                  filterStatus,
-                );
+                fetchApiKeys(1, pagination.pageSize as number, keyword, v, filterStatus);
               }}
               style={{ width: 160 }}
               options={groupOptions}
@@ -381,13 +374,7 @@ export const ApiKeysPage = () => {
               value={filterStatus}
               onChange={(v) => {
                 setFilterStatus(v);
-                fetchApiKeys(
-                  1,
-                  pagination.pageSize as number,
-                  keyword,
-                  filterGroup,
-                  v,
-                );
+                fetchApiKeys(1, pagination.pageSize as number, keyword, filterGroup, v);
               }}
               style={{ width: 110 }}
               options={statusOptions}
@@ -399,29 +386,29 @@ export const ApiKeysPage = () => {
               <Button
                 icon={<ReloadOutlined />}
                 loading={loading}
-                onClick={() =>
-                  fetchApiKeys(
-                    pagination.current as number,
-                    pagination.pageSize as number,
-                    keyword,
-                  )
-                }
+                onClick={() => fetchApiKeys(pagination.current as number, pagination.pageSize as number, keyword)}
               />
             </Tooltip>
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => {
-                setEditingRecord(null);
-                setFormVisible(true);
-              }}
+              onClick={() => { setEditingRecord(null); setFormVisible(true); }}
             >
               {t('apiKeys.createKey')}
             </Button>
           </Space>
         </Flex>
+      </div>
 
-        {/* table */}
+      {/* table — 独立圆角卡片，无外层包装 */}
+      <div
+        style={{
+          background: cardBg,
+          border: `1px solid ${borderColor}`,
+          borderRadius: 12,
+          overflow: 'hidden',
+        }}
+      >
         <ApiKeyTable
           dataSource={apiKeys}
           loading={loading}
@@ -431,23 +418,12 @@ export const ApiKeysPage = () => {
           isDark={isDark}
           onToggleVisibility={handleToggleVisibility}
           onCopyKey={handleCopyKey}
-          onEdit={(r) => {
-            setEditingRecord(r);
-            setFormVisible(true);
-          }}
+          onEdit={(r) => { setEditingRecord(r); setFormVisible(true); }}
           onDelete={handleDelete}
           onToggleStatus={handleToggleStatus}
-          onUseKey={(r) => {
-            setUseKeyRecord(r);
-            setUseKeyVisible(true);
-          }}
-          onImportCSS={(r) => {
-            setCssRecord(r);
-            setCssVisible(true);
-          }}
-          onChange={(pg) =>
-            fetchApiKeys(pg.current || 1, pg.pageSize || 10, keyword)
-          }
+          onUseKey={(r) => { setUseKeyRecord(r); setUseKeyVisible(true); }}
+          onImportCSS={(r) => { setCssRecord(r); setCssVisible(true); }}
+          onChange={(pg) => fetchApiKeys(pg.current || 1, pg.pageSize || 10, keyword)}
         />
       </div>
 

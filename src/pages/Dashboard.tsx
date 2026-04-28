@@ -61,7 +61,7 @@ interface DataSelfItem {
   quota: number;
 }
 
-type TimeRange = '24h' | '7d' | '30d' | '90d';
+type TimeRange = '24h' | '7d' | '30d';
 type Granularity = 'hour' | 'day';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -92,13 +92,11 @@ function getTimeRange(range: TimeRange): { start: number; end: number; defaultTi
     '24h': 86400,
     '7d': 86400 * 7,
     '30d': 86400 * 30,
-    '90d': 86400 * 90,
   };
   const granularity: Record<TimeRange, Granularity> = {
     '24h': 'hour',
     '7d': 'day',
     '30d': 'day',
-    '90d': 'day',
   };
   return { start: end - map[range], end, defaultTime: granularity[range] };
 }
@@ -128,10 +126,10 @@ const StatCard: React.FC<StatCardProps> = ({
 }) => (
   <Card
     style={{
-      border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-      boxShadow: isDark ? '0 1px 4px rgba(0,0,0,0.25)' : '0 1px 2px rgba(0,0,0,0.03)',
-      background: isDark ? '#141414' : '#ffffff',
-      borderRadius: 8,
+      border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#EAECF0'}`,
+      boxShadow: isDark ? 'none' : '0 1px 2px rgba(0,0,0,0.04)',
+      background: isDark ? '#1e1e1e' : '#ffffff',
+      borderRadius: 12,
     }}
     hoverable
   >
@@ -141,27 +139,27 @@ const StatCard: React.FC<StatCardProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 48,
-          height: 48,
-          borderRadius: 8,
-          background: `${iconColor}18`,
+          width: 44,
+          height: 44,
+          borderRadius: 10,
+          background: isDark ? `${iconColor}22` : `${iconColor}15`,
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 22, color: iconColor }}>{icon}</span>
+        <span style={{ fontSize: 20, color: iconColor }}>{icon}</span>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, color: isDark ? '#8c8c8c' : '#666', marginBottom: 4, fontWeight: 500 }}>
+        <div style={{ fontSize: 12, color: isDark ? 'rgba(255,255,255,0.4)' : '#94a3b8', marginBottom: 4, fontWeight: 500 }}>
           {title}
         </div>
         {loading ? (
           <Spin size="small" />
         ) : (
-          <div style={{ fontSize: 18, fontWeight: 700, color: isDark ? '#fff' : '#000', marginBottom: 4 }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: isDark ? '#f1f5f9' : '#0f172a', marginBottom: 2 }}>
             {value}
           </div>
         )}
-        <div style={{ fontSize: 12, color: isDark ? '#595959' : '#999' }}>{subtitle}</div>
+        <div style={{ fontSize: 12, color: isDark ? 'rgba(255,255,255,0.28)' : '#94a3b8' }}>{subtitle}</div>
       </div>
     </Flex>
   </Card>
@@ -302,11 +300,11 @@ export const DashboardPage = () => {
     yAxis: { label: { formatter: (v: string) => formatTokens(Number(v)) } },
   };
 
-  const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const cardBg = isDark ? '#141414' : '#ffffff';
+  const cardBorder = isDark ? 'rgba(255,255,255,0.08)' : '#EAECF0';
+  const cardBg = isDark ? '#1e1e1e' : '#ffffff';
   const cardStyle = {
     border: `1px solid ${cardBorder}`,
-    boxShadow: isDark ? '0 1px 4px rgba(0,0,0,0.25)' : '0 1px 2px rgba(0,0,0,0.03)',
+    boxShadow: isDark ? 'none' : '0 1px 2px rgba(0,0,0,0.04)',
     background: cardBg,
     borderRadius: 12,
   };
@@ -415,7 +413,6 @@ export const DashboardPage = () => {
               { label: '近 24 小时', value: '24h' },
               { label: '近 7 天', value: '7d' },
               { label: '近 30 天', value: '30d' },
-              { label: '近 90 天', value: '90d' },
             ]}
           />
           <Text style={{ fontSize: 14 }}>粒度:</Text>
@@ -479,7 +476,7 @@ export const DashboardPage = () => {
         title="模型用量明细"
         extra={
           <Text style={{ fontSize: 12, color: isDark ? '#8c8c8c' : '#999' }}>
-            {timeRange === '24h' ? '近 24 小时' : timeRange === '7d' ? '近 7 天' : timeRange === '30d' ? '近 30 天' : '近 90 天'}
+            {timeRange === '24h' ? '近 24 小时' : timeRange === '7d' ? '近 7 天' : '近 30 天'}
           </Text>
         }
         style={cardStyle}

@@ -6,7 +6,7 @@ import { StylesContext } from './context';
 import routes from './routes/routes.tsx';
 import { useSelector } from 'react-redux';
 import { RootState } from './redux/store';
-import { PRIMARY_COLOR } from './theme/colors';
+import { PRIMARY_COLOR, HORIZON, hexToRgba } from './theme/colors';
 import './App.css';
 
 // Legacy COLOR export for backward compatibility
@@ -37,53 +37,70 @@ function App() {
           token: {
             colorPrimary: PRIMARY_COLOR,
             // ── 圆角 ──────────────────────────────────────────────
-            borderRadius: 6,
-            borderRadiusSM: 4,
-            borderRadiusLG: 8,
-            borderRadiusXS: 2,
+            borderRadius: 10,
+            borderRadiusSM: 6,
+            borderRadiusLG: 14,
+            borderRadiusXS: 4,
             // ── 字体 ──────────────────────────────────────────────
             fontFamily:
-              "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+              "'DM Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
             fontSize: 14,
-            // ── 间距 ──────────────────────────────────────────────
             lineHeight: 1.6,
             // ── 颜色 ──────────────────────────────────────────────
-            colorBorder: isDark ? 'rgba(255,255,255,0.12)' : '#e5e7eb',
-            colorBorderSecondary: isDark ? 'rgba(255,255,255,0.07)' : '#f0f0f0',
-            colorBgContainer: isDark ? '#141414' : '#ffffff',
-            colorBgElevated: isDark ? '#1e1e1e' : '#ffffff',
+            colorBorder: isDark ? 'rgba(255,255,255,0.10)' : '#E2E8F0',
+            colorBorderSecondary: isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0',
+            colorBgContainer: isDark ? '#1e1e1e' : '#ffffff',
+            colorBgElevated: isDark ? '#252525' : '#ffffff',
+            colorBgLayout: isDark ? '#111318' : '#F8FAFC',
+            colorTextBase: isDark ? '#e2e8f0' : '#0f172a',
+            colorTextSecondary: isDark ? 'rgba(255,255,255,0.45)' : '#64748b',
           },
           components: {
-            // ── Button ────────────────────────────────────────────
+            // ── Button — 渐变 + 大圆角 ───────────────────────────
             Button: {
-              fontWeight: 500,
-              primaryShadow: 'none',
+              fontWeight: 700,
+              primaryShadow: '0 4px 15px rgba(218,118,88,0.40)',
               defaultShadow: 'none',
               dangerShadow: 'none',
-              controlHeight: 34,
-              controlHeightLG: 40,
-              controlHeightSM: 28,
-              paddingContentHorizontal: 16,
+              controlHeight: 46,
+              controlHeightLG: 52,
+              controlHeightSM: 34,
+              paddingContentHorizontal: 24,
+              borderRadius: 10,
+              borderRadiusSM: 6,
+              borderRadiusLG: 14,
             },
-            // ── Input ─────────────────────────────────────────────
+            // ── Input — 大圆角 ────────────────────────────────────
             Input: {
-              controlHeight: 34,
-              controlHeightLG: 40,
-              controlHeightSM: 28,
-              paddingBlock: 5,
-              activeShadow: `0 0 0 2px ${PRIMARY_COLOR}33`,
+              controlHeight: 46,
+              controlHeightLG: 52,
+              controlHeightSM: 34,
+              paddingBlock: 10,
+              paddingInline: 16,
+              activeShadow: `0 0 0 3px rgba(218,118,88,0.18)`,
+              borderRadius: 10,
+              colorBgContainer: isDark ? 'rgba(255,255,255,0.06)' : '#ffffff',
+              colorBorder: isDark ? 'rgba(255,255,255,0.12)' : '#E2E8F0',
+              hoverBorderColor: PRIMARY_COLOR,
+              activeBorderColor: PRIMARY_COLOR,
             },
             Select: {
-              controlHeight: 34,
-              controlHeightLG: 40,
-              controlHeightSM: 28,
+              controlHeight: 46,
+              controlHeightLG: 52,
+              controlHeightSM: 34,
+              borderRadius: 10,
+              colorBgContainer: isDark ? 'rgba(255,255,255,0.06)' : '#ffffff',
+              colorBorder: isDark ? 'rgba(255,255,255,0.12)' : '#E2E8F0',
+              optionSelectedBg: isDark ? hexToRgba(PRIMARY_COLOR, 0.15) : hexToRgba(PRIMARY_COLOR, 0.08),
+              optionSelectedColor: PRIMARY_COLOR,
+              optionActiveBg: isDark ? 'rgba(255,255,255,0.05)' : hexToRgba(PRIMARY_COLOR, 0.05),
             },
-            // ── Card ──────────────────────────────────────────────
+            // ── Card ─────────────────────────────────────────────
             Card: {
-              paddingLG: 20,
-              colorBorderSecondary: isDark
-                ? 'rgba(255,255,255,0.08)'
-                : '#e5e7eb',
+              paddingLG: 24,
+              borderRadiusLG: 14,
+              colorBorderSecondary: isDark ? 'rgba(255,255,255,0.08)' : '#EAECF0',
+              colorBgContainer: isDark ? '#1e1e1e' : '#ffffff',
             },
             // ── Tag ───────────────────────────────────────────────
             Tag: {
@@ -93,30 +110,31 @@ function App() {
             },
             // ── Table ─────────────────────────────────────────────
             Table: {
-              colorBgContainer: isDark ? '#141414' : '#ffffff',
-              headerBg: isDark ? '#141414' : '#ffffff',
-              rowHoverBg: isDark ? '#1f1f1f' : '#fafafa',
-              borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#f0f0f0',
+              colorBgContainer: isDark ? '#1e1e1e' : '#ffffff',
+              headerBg: isDark ? '#252525' : '#f8fafc',
+              rowHoverBg: isDark ? 'rgba(255,255,255,0.04)' : '#f8fafc',
+              borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#EAECF0',
               headerSplitColor: 'transparent',
-              cellPaddingBlock: 12,
+              cellPaddingBlock: 14,
               cellPaddingInline: 16,
+              borderRadius: 12,
             },
             // ── Dropdown ──────────────────────────────────────────
             Dropdown: {
-              borderRadiusLG: 8,
-              paddingBlock: 5,
+              borderRadiusLG: 12,
+              paddingBlock: 6,
             },
             // ── Modal  ────────────────────────────────────────────
             Modal: {
-              borderRadiusLG: 10,
+              borderRadiusLG: 14,
             },
             // ── Popover ───────────────────────────────────────────
             Popover: {
-              borderRadiusLG: 8,
+              borderRadiusLG: 12,
             },
             // ── Divider ───────────────────────────────────────────
             Divider: {
-              colorSplit: isDark ? 'rgba(255,255,255,0.07)' : '#f0f0f0',
+              colorSplit: isDark ? 'rgba(255,255,255,0.07)' : '#EAECF0',
             },
             // ── Badge ─────────────────────────────────────────────
             Badge: {

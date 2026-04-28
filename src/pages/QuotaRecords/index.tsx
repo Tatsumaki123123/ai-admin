@@ -10,7 +10,6 @@ import {
   Row,
   Col,
   DatePicker,
-  Space,
 } from 'antd';
 import {
   ArrowDownOutlined,
@@ -332,23 +331,29 @@ export const QuotaRecordsPage = () => {
   return (
     <div>
       {/* ── Header ── */}
-      <Flex justify="flex-end" align="center" gap={8} style={{ marginBottom: 20 }}>
-        <Space>
-          <RangePicker
-            value={dateRange}
-            onChange={(v) => {
-              if (v?.[0] && v?.[1]) {
-                const r: [Dayjs, Dayjs] = [v[0], v[1]];
-                setDateRange(r);
-                fetchData(r);
-              }
-            }}
-            allowClear={false}
-          />
-          <Button icon={<ReloadOutlined />} onClick={() => fetchData()} loading={loading}>
-            刷新
-          </Button>
-        </Space>
+      <Flex justify="flex-start" align="center" gap={8} style={{ marginBottom: 20 }}>
+        <RangePicker
+          value={dateRange}
+          onChange={(v) => {
+            if (v?.[0] && v?.[1]) {
+              const r: [Dayjs, Dayjs] = [v[0], v[1]];
+              setDateRange(r);
+              fetchData(r);
+            }
+          }}
+          allowClear={false}
+          size="middle"
+          style={{ height: 36 }}
+        />
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={() => fetchData()}
+          loading={loading}
+          size="middle"
+          style={{ height: 36 }}
+        >
+          刷新
+        </Button>
       </Flex>
 
       {/* ── Summary cards ── */}

@@ -1,5 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
 :root {
   font-family:
+    'DM Sans',
     'Inter',
     system-ui,
     -apple-system,
@@ -49,6 +52,33 @@ body {
   line-height: 1.8;
 }
 /* Card 无阴影 */
+.ant-card {
+  box-shadow: none !important;
+}
+
+/* ── 侧边栏菜单选中项 — 左侧色条 ── */
+.ant-menu-item-selected {
+  position: relative;
+}
+.ant-menu-item-selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 0 3px 3px 0;
+  background: #da7658;
+}
+
+/* ── 下拉弹出层圆角 ── */
+.ant-select-dropdown {
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+/* ── 卡片：去掉默认阴影，让 token 控制 ── */
 .ant-card {
   box-shadow: none !important;
 }
