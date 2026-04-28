@@ -152,7 +152,6 @@ export const QuotaRecordsPage = () => {
   // ── Summary ─────────────────────────────────────────────────────────────────
   const totalTopup   = summary?.total_topup_amount ?? 0;
   const totalConsume = summary?.total_consume ?? 0;
-  const currentQuota = summary?.current_quota ?? 0;
   const topupCount   = summary?.total_topup_count ?? 0;
   const redeemCount  = summary?.total_redemption_count ?? 0;
   const netUsd = toUsd(totalTopup - totalConsume);
